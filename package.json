@@ -11,8 +11,15 @@
   "keywords": [
     "riemann"
   ],
-  "author": "Toan Tran",
+  "author": {
+    "name": "Toan Tran",
+    "email": "ttkbnt@hotmail.com"
+  },
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tntran09/riemann.git"
+  },
   "dependencies": {
     "babel-preset-react": "^6.3.13",
     "babelify": "^7.2.0",
