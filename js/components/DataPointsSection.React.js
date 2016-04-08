@@ -1,4 +1,4 @@
-var React = require('react');
+var React = require('react/dist/react.min');
 var RiemannActions = require('../actions/RiemannActions');
 
 var DataPointsSection = React.createClass({
@@ -7,14 +7,6 @@ var DataPointsSection = React.createClass({
   },
 
   render: function () {
-    var listItems = [];
-    for(var i = 0; i < this.props.data.length; i++) {
-      var pt = this.props.data[i];
-
-      listItems.push(
-        <li key={i}>({pt[0]}, {pt[1]})</li>
-      );
-    }
     var tbody = this._buildTableBody(this.props.data);
 
     return (

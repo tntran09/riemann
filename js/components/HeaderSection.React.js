@@ -1,4 +1,4 @@
-var React = require('react');
+var React = require('react/dist/react.min');
 
 var HeaderSection = React.createClass({
   render: function () {

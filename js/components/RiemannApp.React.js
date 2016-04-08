@@ -1,4 +1,4 @@
-var React = require('react');
+var React = require('react/dist/react.min');
 var RiemannStore = require('../stores/RiemannStore');
 var HeaderSection = require('./HeaderSection.React');
 var DataPointsSection = require('./DataPointsSection.React');
