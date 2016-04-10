@@ -18,7 +18,7 @@ var GraphSvg = React.createClass({
     // draw the rectangles based on the sumType
     var rects = this._buildRects(this.props.data);
     // draw the interpolated line
-    //   the line's path would require d3
+    var line = this._buildLine(this.props.data);
     // draw the points
     var points = this._buildPoints(this.props.data);
     // build axes, scales, etc.
@@ -28,6 +28,7 @@ var GraphSvg = React.createClass({
 
     return (
       <svg id="graphSvg" width="800" height="400" style={{border: '1px solid black'}}>
+        {line}
         {points}
       </svg>
     );
@@ -38,6 +39,17 @@ var GraphSvg = React.createClass({
     return rects;
   },
 
+  _buildLine: function (data) {
+    var lineGenFn = d3.svg.line()
+      .x(function (d) { return (d[0] / 30) * 600 + this.state.ORIGIN_X; })
+      .y(function (d) { return -(d[1] / 10) * 300 + this.state.ORIGIN_Y; })
+      .interpolate('linear');
+
+    return (
+      <path d={lineGenFn.call(this, data)} style={{stroke: 'black', fill: 'none', strokeWidth: '2px'}}></path>
+    );
+  },
+
   _buildPoints: function (data) {
     var points = [];
 
@@ -46,7 +58,7 @@ var GraphSvg = React.createClass({
       var cx = (_x / 30) * 600 + 100;
       var cy = -(_y / 10) * 300 + 350;
       points.push(
-        <circle key={i} cx={cx} cy={cy} r="5" style={{fill: 'red'}} />
+        <circle key={i} cx={cx} cy={cy} r="3" style={{fill: 'black'}} />
       );
     }
 

@@ -3,6 +3,7 @@ var RiemannStore = require('../stores/RiemannStore');
 var HeaderSection = require('./HeaderSection.React');
 var DataPointsSection = require('./DataPointsSection.React');
 var GraphSection = require('./GraphSection.React');
+var CalcSection = require('./CalcSection.React');
 
 function getAppState() {
   return {
@@ -32,7 +33,7 @@ var RiemannApp = React.createClass({
           <DataPointsSection data={this.state.dataPoints} />
           <GraphSection data={this.state.dataPoints} sumType={this.state.sumType} />
         </div>
-        <div id="calcSection"></div>
+        <CalcSection />
       </div>
     );
   },

@@ -1,6 +1,6 @@
 var React = require('react/dist/react.min');
 var RiemannActions = require('../actions/RiemannActions');
-var Graph = require('./GraphSvg.React');
+var GraphSvg = require('./GraphSvg.React');
 
 var GraphSection = React.createClass({
   propTypes: {
@@ -23,7 +23,7 @@ var GraphSection = React.createClass({
           </div>
         </div>
 
-        <Graph data={this.props.data} sumType={this.props.sumType} />
+        <GraphSvg data={this.props.data} sumType={this.props.sumType} />
       </div>
     );
   },
