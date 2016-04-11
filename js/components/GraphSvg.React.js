@@ -4,6 +4,7 @@ var d3 = require('d3/d3.min');
 var GraphSvg = React.createClass({
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
+    rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
     sumType: React.PropTypes.string.isRequired
   },
 
@@ -24,7 +25,7 @@ var GraphSvg = React.createClass({
 
   render: function () {
     // draw the rectangles based on the sumType
-    var rects = this._buildRects(this.props.data);
+    var rects = this._buildRects(this.props.data, this.props.rectHeights);
     // draw the interpolated line
     var line = this._buildLine(this.props.data);
     // draw the points
@@ -32,6 +33,7 @@ var GraphSvg = React.createClass({
 
     return (
       <svg id="graphSvg" width="800" height="400" style={{border: '1px solid black'}}>
+        {rects}
         {line}
         {points}
         <g id="xAxisGroup" ref="xAxisGroup" className="axis" transform={'translate(0, '+this.state.ORIGIN_Y+')'}></g>
@@ -40,15 +42,33 @@ var GraphSvg = React.createClass({
     );
   },
 
-  _buildRects: function (data) {
+  _toSvgX: function (_x) {
+    return (_x / 30) * 600 + this.state.ORIGIN_X;
+  },
+
+  _toSvgY: function (_y) {
+    return -(_y / 10) * 300 + this.state.ORIGIN_Y;
+  },
+
+  _buildRects: function (data, heightArray) {
     var rects = [];
+    for(var i = 0; i < heightArray.length; i++) {
+      var x = this._toSvgX(data[i][0]);
+      var y = this._toSvgY(heightArray[i]);
+      var width = this._toSvgX(data[i + 1][0]) - this._toSvgX(data[i][0]);
+      var height = this.state.ORIGIN_Y - y;
+      rects.push(
+        <rect x={x} y={y} width={width} height={height} />
+      );
+    }
+
     return rects;
   },
 
   _buildLine: function (data) {
     var lineGenFn = d3.svg.line()
-      .x(function (d) { return (d[0] / 30) * 600 + this.state.ORIGIN_X; })
-      .y(function (d) { return -(d[1] / 10) * 300 + this.state.ORIGIN_Y; })
+      .x(function (d) { return this._toSvgX(d[0]); })
+      .y(function (d) { return this._toSvgY(d[1]); })
       .interpolate('linear');
 
     var style = {
@@ -66,9 +86,8 @@ var GraphSvg = React.createClass({
     var points = [];
 
     for(var i = 0; i < data.length; i++) {
-      var _x = data[i][0], _y = data[i][1];
-      var cx = (_x / 30) * 600 + this.state.ORIGIN_X;
-      var cy = -(_y / 10) * 300 + this.state.ORIGIN_Y;
+      var cx = this._toSvgX(data[i][0]);
+      var cy = this._toSvgY(data[i][1]);
       points.push(
         <circle key={i} cx={cx} cy={cy} r="3" style={{fill: 'black'}} />
       );

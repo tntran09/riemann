@@ -9,24 +9,52 @@ var _dataPoints = [
   [0, 7.5], [4, 9], [8, 9.3], [12, 9.5], [16, 8.8], [20, 8], [24, 7.2]
 ]; // clear default data after building input
 var _sumType = 'Upper';
-// var rectAreas = [], totalRiemannSum = 0.0;
+var _rectHeights = [];
+// totalRiemannSum = 0.0;
 var _lineType = ''; // linear, basis
 var _inputX = '';
 var _inputY = '';
+recalculateSum(); // TODO: remove
 
 function changeSumType(value) {
   _sumType = value
-  // recalculate sum
+  recalculateSum();
 }
 
 function deleteDataPoint(index) {
   _dataPoints.splice(index, 1);
-  // recalculate sum
+  recalculateSum();
+}
+
+function recalculateSum() {
+  _rectHeights = [];
+  var numberOfRectangles = _dataPoints.length - 1;
+  var fn = chooseHeightFn();
+  for(var i = 0; i < numberOfRectangles; i++) {
+    _rectHeights[i] = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+  }
+}
+
+function chooseHeightFn() {
+  switch(_sumType) {
+    case 'Upper':
+      return function (leftValue, rightValue) { return Math.max(leftValue, rightValue); };
+    case 'Lower':
+      return function (leftValue, rightValue) { return Math.min(leftValue, rightValue); };
+    case 'Left':
+      return function (leftValue, rightValue) { return leftValue; };
+    case 'Right':
+      return function (leftValue, rightValue) { return rightValue; };
+  }
 }
 
 var RiemannStore = Object.assign({}, EventEmitter.prototype, {
   getDataPoints: function () {
       return _dataPoints;
+  },
+
+  getRectHeights: function () {
+    return _rectHeights;
   },
 
   getSumType: function () {

@@ -8,6 +8,7 @@ var CalcSection = require('./CalcSection.React');
 function getAppState() {
   return {
     dataPoints: RiemannStore.getDataPoints(),
+    rectHeights: RiemannStore.getRectHeights(),
     sumType: RiemannStore.getSumType()
   };
 }
@@ -31,7 +32,7 @@ var RiemannApp = React.createClass({
         <HeaderSection />
         <div className="row">
           <DataPointsSection data={this.state.dataPoints} />
-          <GraphSection data={this.state.dataPoints} sumType={this.state.sumType} />
+          <GraphSection data={this.state.dataPoints} sumType={this.state.sumType} rectHeights={this.state.rectHeights} />
         </div>
         <CalcSection />
       </div>

@@ -5,6 +5,7 @@ var GraphSvg = require('./GraphSvg.React');
 var GraphSection = React.createClass({
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
+    rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
     sumType: React.PropTypes.string.isRequired
   },
 
@@ -23,7 +24,7 @@ var GraphSection = React.createClass({
           </div>
         </div>
 
-        <GraphSvg data={this.props.data} sumType={this.props.sumType} />
+        <GraphSvg data={this.props.data} sumType={this.props.sumType} rectHeights={this.props.rectHeights} />
       </div>
     );
   },
