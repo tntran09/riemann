@@ -610,6 +610,14 @@ var GraphSvg = React.createClass({
     };
   },
 
+  componentDidMount: function () {
+    this._buildAxes();
+  },
+
+  // componentDidUpdate: function () {
+  //   this._buildAxes();
+  // },
+
   render: function () {
     // draw the rectangles based on the sumType
     var rects = this._buildRects(this.props.data);
@@ -617,16 +625,14 @@ var GraphSvg = React.createClass({
     var line = this._buildLine(this.props.data);
     // draw the points
     var points = this._buildPoints(this.props.data);
-    // build axes, scales, etc.
-    // var xScale = d3.scale.linear.domain()
-    // var xAxis = d3.svg.axis();
-    // xAxis.scale()
 
     return React.createElement(
       'svg',
       { id: 'graphSvg', width: '800', height: '400', style: { border: '1px solid black' } },
       line,
-      points
+      points,
+      React.createElement('g', { id: 'xAxisGroup', ref: 'xAxisGroup', className: 'axis', transform: 'translate(0, ' + this.state.ORIGIN_Y + ')' }),
+      React.createElement('g', { id: 'yAxisGroup', ref: 'yAxisGroup', className: 'axis', transform: 'translate(' + this.state.ORIGIN_X + ', 0)' })
     );
   },
 
@@ -642,7 +648,13 @@ var GraphSvg = React.createClass({
       return -(d[1] / 10) * 300 + this.state.ORIGIN_Y;
     }).interpolate('linear');
 
-    return React.createElement('path', { d: lineGenFn.call(this, data), style: { stroke: 'black', fill: 'none', strokeWidth: '2px' } });
+    var style = {
+      fill: 'none',
+      stroke: 'black',
+      strokeWidth: '2px'
+    };
+
+    return React.createElement('path', { d: lineGenFn.call(this, data), style: style });
   },
 
   _buildPoints: function (data) {
@@ -651,12 +663,23 @@ var GraphSvg = React.createClass({
     for (var i = 0; i < data.length; i++) {
       var _x = data[i][0],
           _y = data[i][1];
-      var cx = _x / 30 * 600 + 100;
-      var cy = -(_y / 10) * 300 + 350;
+      var cx = _x / 30 * 600 + this.state.ORIGIN_X;
+      var cy = -(_y / 10) * 300 + this.state.ORIGIN_Y;
       points.push(React.createElement('circle', { key: i, cx: cx, cy: cy, r: '3', style: { fill: 'black' } }));
     }
 
     return points;
+  },
+
+  _buildAxes: function () {
+    // build axes, scales, etc.
+    var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
+    var xAxisFn = d3.svg.axis().ticks(12).tickSize(10, 1).scale(xScale).orient('bottom');
+    var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
+    var yAxisFn = d3.svg.axis().ticks(5).tickSize(10, 1).scale(yScale).orient('left');
+
+    d3.select(this.refs.xAxisGroup).call(xAxisFn);
+    d3.select(this.refs.yAxisGroup).call(yAxisFn);
   }
 });
 
