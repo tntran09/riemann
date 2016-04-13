@@ -10,11 +10,11 @@ var _dataPoints = [
 ]; // clear default data after building input
 var _sumType = 'Upper';
 var _rectHeights = [];
-// totalRiemannSum = 0.0;
-var _lineType = ''; // linear, basis
+var _totalRiemannSum = 0.0;
+var _lineType = ''; // linear, basis, etc.
 var _inputX = '';
 var _inputY = '';
-recalculateSum(); // TODO: remove
+recalculateSum(); // TODO: remove after clearing default data
 
 function changeSumType(value) {
   _sumType = value
@@ -28,11 +28,16 @@ function deleteDataPoint(index) {
 
 function recalculateSum() {
   _rectHeights = [];
+  _totalRiemannSum = 0;
   var numberOfRectangles = _dataPoints.length - 1;
   var fn = chooseHeightFn();
   for(var i = 0; i < numberOfRectangles; i++) {
-    _rectHeights[i] = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+    var h = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+    _rectHeights[i] = h;
+    _totalRiemannSum += h * (_dataPoints[i + 1][0] - _dataPoints[i][0]);
   }
+
+  _totalRiemannSum = Math.round(_totalRiemannSum * 1000000) / 1000000;
 }
 
 function chooseHeightFn() {
@@ -45,20 +50,19 @@ function chooseHeightFn() {
       return function (leftValue, rightValue) { return leftValue; };
     case 'Right':
       return function (leftValue, rightValue) { return rightValue; };
+    case 'Midpoint':
+      return function (leftValue, rightValue) { return (leftValue + rightValue) / 2; };
   }
 }
 
 var RiemannStore = Object.assign({}, EventEmitter.prototype, {
-  getDataPoints: function () {
-      return _dataPoints;
-  },
-
-  getRectHeights: function () {
-    return _rectHeights;
-  },
-
-  getSumType: function () {
-    return _sumType;
+  getAppState: function () {
+    return {
+      dataPoints: _dataPoints,
+      rectHeights: _rectHeights,
+      sumType: _sumType,
+      totalRiemannSum: _totalRiemannSum
+    };
   },
 
   emitChange: function() {

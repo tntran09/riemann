@@ -5,17 +5,9 @@ var DataPointsSection = require('./DataPointsSection.React');
 var GraphSection = require('./GraphSection.React');
 var CalcSection = require('./CalcSection.React');
 
-function getAppState() {
-  return {
-    dataPoints: RiemannStore.getDataPoints(),
-    rectHeights: RiemannStore.getRectHeights(),
-    sumType: RiemannStore.getSumType()
-  };
-}
-
 var RiemannApp = React.createClass({
   getInitialState: function () {
-    return getAppState();
+    return RiemannStore.getAppState();
   },
 
   componentDidMount: function() {
@@ -34,13 +26,13 @@ var RiemannApp = React.createClass({
           <DataPointsSection data={this.state.dataPoints} />
           <GraphSection data={this.state.dataPoints} sumType={this.state.sumType} rectHeights={this.state.rectHeights} />
         </div>
-        <CalcSection />
+        <CalcSection data={this.state.dataPoints} sumType={this.state.sumType} rectHeights={this.state.rectHeights} totalRiemannSum={this.state.totalRiemannSum} />
       </div>
     );
   },
 
   _onChange: function() {
-    this.setState(getAppState());
+    this.setState(RiemannStore.getAppState());
   }
 });
 

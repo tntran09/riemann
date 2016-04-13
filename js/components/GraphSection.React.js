@@ -20,11 +20,15 @@ var GraphSection = React.createClass({
               <option>Lower</option>
               <option>Left</option>
               <option>Right</option>
+              <option>Midpoint</option>
             </select>
           </div>
         </div>
-
-        <GraphSvg data={this.props.data} sumType={this.props.sumType} rectHeights={this.props.rectHeights} />
+        <div className="row">
+          <div className="col-xs-12">
+            <GraphSvg data={this.props.data} sumType={this.props.sumType} rectHeights={this.props.rectHeights} />
+          </div>
+        </div>
       </div>
     );
   },

@@ -425,10 +425,52 @@ ReactDOM.render(React.createElement(RiemannApp, null), document.getElementById('
 var React = require('react/dist/react.min');
 
 var CalcSection = React.createClass({
-  displayName: "CalcSection",
+  displayName: 'CalcSection',
+
+  propTypes: {
+    data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
+    rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
+    sumType: React.PropTypes.string.isRequired,
+    totalRiemannSum: React.PropTypes.number.isRequired
+  },
 
   render: function () {
-    return React.createElement("div", { id: "calcSection" });
+    var eqnParts1 = this.props.rectHeights.map(function (value, i) {
+      return '(' + (this.props.data[i + 1][0] - this.props.data[i][0]) + ')(' + value + ')';
+    }, this);
+    var eqnParts2 = this.props.rectHeights.map(function (value, i) {
+      var t = (this.props.data[i + 1][0] - this.props.data[i][0]) * value;
+      return '(' + Math.round(t * 1000000) / 1000000 + ')';
+    }, this);
+
+    return React.createElement(
+      'div',
+      { id: 'calcSection', style: { fontSize: '2.5em' }, hidden: this.props.rectHeights.length == 0 },
+      React.createElement(
+        'p',
+        null,
+        this.props.sumType,
+        ' Sum'
+      ),
+      React.createElement(
+        'p',
+        null,
+        '= ',
+        eqnParts1.join(' + ')
+      ),
+      React.createElement(
+        'p',
+        null,
+        '= ',
+        eqnParts2.join(' + ')
+      ),
+      React.createElement(
+        'p',
+        null,
+        '= ',
+        this.props.totalRiemannSum
+      )
+    );
   }
 });
 
@@ -577,11 +619,24 @@ var GraphSection = React.createClass({
               'option',
               null,
               'Right'
+            ),
+            React.createElement(
+              'option',
+              null,
+              'Midpoint'
             )
           )
         )
       ),
-      React.createElement(GraphSvg, { data: this.props.data, sumType: this.props.sumType, rectHeights: this.props.rectHeights })
+      React.createElement(
+        'div',
+        { className: 'row' },
+        React.createElement(
+          'div',
+          { className: 'col-xs-12' },
+          React.createElement(GraphSvg, { data: this.props.data, sumType: this.props.sumType, rectHeights: this.props.rectHeights })
+        )
+      )
     );
   },
 
@@ -740,19 +795,11 @@ var DataPointsSection = require('./DataPointsSection.React');
 var GraphSection = require('./GraphSection.React');
 var CalcSection = require('./CalcSection.React');
 
-function getAppState() {
-  return {
-    dataPoints: RiemannStore.getDataPoints(),
-    rectHeights: RiemannStore.getRectHeights(),
-    sumType: RiemannStore.getSumType()
-  };
-}
-
 var RiemannApp = React.createClass({
   displayName: 'RiemannApp',
 
   getInitialState: function () {
-    return getAppState();
+    return RiemannStore.getAppState();
   },
 
   componentDidMount: function () {
@@ -774,12 +821,12 @@ var RiemannApp = React.createClass({
         React.createElement(DataPointsSection, { data: this.state.dataPoints }),
         React.createElement(GraphSection, { data: this.state.dataPoints, sumType: this.state.sumType, rectHeights: this.state.rectHeights })
       ),
-      React.createElement(CalcSection, null)
+      React.createElement(CalcSection, { data: this.state.dataPoints, sumType: this.state.sumType, rectHeights: this.state.rectHeights, totalRiemannSum: this.state.totalRiemannSum })
     );
   },
 
   _onChange: function () {
-    this.setState(getAppState());
+    this.setState(RiemannStore.getAppState());
   }
 });
 
@@ -836,11 +883,11 @@ var CHANGE_EVENT = 'change';
 var _dataPoints = [[0, 7.5], [4, 9], [8, 9.3], [12, 9.5], [16, 8.8], [20, 8], [24, 7.2]]; // clear default data after building input
 var _sumType = 'Upper';
 var _rectHeights = [];
-// totalRiemannSum = 0.0;
-var _lineType = ''; // linear, basis
+var _totalRiemannSum = 0.0;
+var _lineType = ''; // linear, basis, etc.
 var _inputX = '';
 var _inputY = '';
-recalculateSum(); // TODO: remove
+recalculateSum(); // TODO: remove after clearing default data
 
 function changeSumType(value) {
   _sumType = value;
@@ -854,11 +901,16 @@ function deleteDataPoint(index) {
 
 function recalculateSum() {
   _rectHeights = [];
+  _totalRiemannSum = 0;
   var numberOfRectangles = _dataPoints.length - 1;
   var fn = chooseHeightFn();
   for (var i = 0; i < numberOfRectangles; i++) {
-    _rectHeights[i] = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+    var h = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+    _rectHeights[i] = h;
+    _totalRiemannSum += h * (_dataPoints[i + 1][0] - _dataPoints[i][0]);
   }
+
+  _totalRiemannSum = Math.round(_totalRiemannSum * 1000000) / 1000000;
 }
 
 function chooseHeightFn() {
@@ -879,20 +931,21 @@ function chooseHeightFn() {
       return function (leftValue, rightValue) {
         return rightValue;
       };
+    case 'Midpoint':
+      return function (leftValue, rightValue) {
+        return (leftValue + rightValue) / 2;
+      };
   }
 }
 
 var RiemannStore = Object.assign({}, EventEmitter.prototype, {
-  getDataPoints: function () {
-    return _dataPoints;
-  },
-
-  getRectHeights: function () {
-    return _rectHeights;
-  },
-
-  getSumType: function () {
-    return _sumType;
+  getAppState: function () {
+    return {
+      dataPoints: _dataPoints,
+      rectHeights: _rectHeights,
+      sumType: _sumType,
+      totalRiemannSum: _totalRiemannSum
+    };
   },
 
   emitChange: function () {
