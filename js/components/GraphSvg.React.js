@@ -11,17 +11,25 @@ var GraphSvg = React.createClass({
   getInitialState: function () {
     return {
       ORIGIN_X: 100,
-      ORIGIN_Y: 350
+      ORIGIN_Y: 350,
+      xToSvgFactor: 20,
+      yToSvgFactor: 30
     }
   },
 
   componentDidMount: function () {
+    console.log('did mount!');
     this._buildAxes();
   },
 
-  // componentDidUpdate: function () {
-  //   this._buildAxes();
-  // },
+  componentDidUpdate: function () {
+    console.log('did update!');
+    this._buildAxes();
+  },
+
+  componentWillReceiveProps: function (nextProps) {
+    console.log('will receive props!');
+  },
 
   render: function () {
     // draw the rectangles based on the sumType
@@ -32,7 +40,7 @@ var GraphSvg = React.createClass({
     var points = this._buildPoints(this.props.data);
 
     return (
-      <svg id="graphSvg" width="800" height="400" style={{border: '1px solid black'}}>
+      <svg id="graphSvg" width="800" height="400">
         {rects}
         {line}
         {points}
@@ -43,11 +51,11 @@ var GraphSvg = React.createClass({
   },
 
   _toSvgX: function (_x) {
-    return (_x / 30) * 600 + this.state.ORIGIN_X;
+    return (_x * this.state.xToSvgFactor) + this.state.ORIGIN_X;
   },
 
   _toSvgY: function (_y) {
-    return -(_y / 10) * 300 + this.state.ORIGIN_Y;
+    return -(_y * this.state.yToSvgFactor) + this.state.ORIGIN_Y;
   },
 
   _buildRects: function (data, heightArray) {
@@ -97,7 +105,7 @@ var GraphSvg = React.createClass({
   },
 
   _buildAxes: function () {
-    // build axes, scales, etc.
+    // Drawing axes is done by D3 after the component is mounted or updated
     var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
     var xAxisFn = d3.svg.axis()
       .ticks(12)

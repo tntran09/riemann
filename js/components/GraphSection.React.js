@@ -11,7 +11,7 @@ var GraphSection = React.createClass({
 
   render: function () {
     return (
-      <div id="graphSection" className="col-xs-10">
+      <div id="graphSection" className="col-xs-9">
         <div className="row">
           <div className="col-xs-offset-5 col-xs-3">
             <label htmlFor="sumType">Sum Method</label>
