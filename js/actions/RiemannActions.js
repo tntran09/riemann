@@ -2,6 +2,14 @@ var AppDispatcher = require('../dispatchers/AppDispatcher');
 var Constants = require('../constants/Constants');
 
 var MolarMassActions = {
+  addPoint: function (x, y) {
+    AppDispatcher.dispatch({
+      actionType: Constants.ADD_POINT,
+      x: x,
+      y: y
+    });
+  },
+
   changeSumType: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,

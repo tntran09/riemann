@@ -18,17 +18,15 @@ var GraphSvg = React.createClass({
   },
 
   componentDidMount: function () {
-    console.log('did mount!');
     this._buildAxes();
   },
 
   componentDidUpdate: function () {
-    console.log('did update!');
     this._buildAxes();
   },
 
   componentWillReceiveProps: function (nextProps) {
-    console.log('will receive props!');
+    // console.log('will receive props!');
   },
 
   render: function () {
@@ -106,6 +104,7 @@ var GraphSvg = React.createClass({
 
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
+    // TODO: Calculate axes based on origin, data
     var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
     var xAxisFn = d3.svg.axis()
       .ticks(12)

@@ -396,6 +396,14 @@ var AppDispatcher = require('../dispatchers/AppDispatcher');
 var Constants = require('../constants/Constants');
 
 var MolarMassActions = {
+  addPoint: function (x, y) {
+    AppDispatcher.dispatch({
+      actionType: Constants.ADD_POINT,
+      x: x,
+      y: y
+    });
+  },
+
   changeSumType: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,
@@ -487,27 +495,75 @@ var DataPointsSection = React.createClass({
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired
   },
 
+  componentDidMount: function () {
+    this.refs.addButton.disabled = true;
+  },
+
   render: function () {
     var tbody = this._buildTableBody(this.props.data);
 
     return React.createElement(
       'div',
-      { id: 'dataPointsSection', className: 'col-xs-2' },
+      { id: 'dataPointsSection', className: 'col-xs-3' },
       React.createElement(
         'h3',
         null,
         'Data'
       ),
       React.createElement(
-        'table',
-        { className: 'table table-hover' },
+        'form',
+        null,
         React.createElement(
-          'tbody',
-          null,
-          tbody
+          'table',
+          { className: 'table table-hover' },
+          React.createElement(
+            'tbody',
+            null,
+            React.createElement(
+              'tr',
+              null,
+              React.createElement(
+                'td',
+                null,
+                '('
+              ),
+              React.createElement(
+                'td',
+                null,
+                React.createElement('input', { name: 'inputX', ref: 'inputX', className: 'form-control', placeholder: 'X', onChange: this._validateInput })
+              ),
+              React.createElement(
+                'td',
+                null,
+                React.createElement('input', { name: 'inputY', ref: 'inputY', className: 'form-control', placeholder: 'Y', onChange: this._validateInput })
+              ),
+              React.createElement(
+                'td',
+                null,
+                ')'
+              ),
+              React.createElement(
+                'td',
+                null,
+                React.createElement(
+                  'button',
+                  { type: 'submit', ref: 'addButton', className: 'btn btn-default', onClick: this._addDataPoint },
+                  ' + '
+                )
+              )
+            ),
+            tbody
+          )
         )
       )
     );
+  },
+
+  _addDataPoint: function (event) {
+    RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
+    this.refs.inputX.value = '';
+    this.refs.inputY.value = '';
+    event.preventDefault();
   },
 
   _buildTableRow: function (key, pt) {
@@ -540,7 +596,7 @@ var DataPointsSection = React.createClass({
         null,
         React.createElement(
           'button',
-          { type: 'button', className: 'close', onClick: this._deleteDataPoint.bind(this, key) },
+          { type: 'button', className: 'close', onClick: this._deleteDataPoint.bind(this, key), style: { float: 'left' } },
           React.createElement(
             'span',
             null,
@@ -563,6 +619,11 @@ var DataPointsSection = React.createClass({
 
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
+  },
+
+  _validateInput: function () {
+    // TODO: disallow when x value already exists
+    this.refs.addButton.disabled = Number.isNaN(parseFloat(this.refs.inputX.value)) || Number.isNaN(parseFloat(this.refs.inputY.value));
   }
 });
 
@@ -585,7 +646,7 @@ var GraphSection = React.createClass({
   render: function () {
     return React.createElement(
       'div',
-      { id: 'graphSection', className: 'col-xs-10' },
+      { id: 'graphSection', className: 'col-xs-9' },
       React.createElement(
         'div',
         { className: 'row' },
@@ -663,7 +724,9 @@ var GraphSvg = React.createClass({
   getInitialState: function () {
     return {
       ORIGIN_X: 100,
-      ORIGIN_Y: 350
+      ORIGIN_Y: 350,
+      xToSvgFactor: 20,
+      yToSvgFactor: 30
     };
   },
 
@@ -671,9 +734,13 @@ var GraphSvg = React.createClass({
     this._buildAxes();
   },
 
-  // componentDidUpdate: function () {
-  //   this._buildAxes();
-  // },
+  componentDidUpdate: function () {
+    this._buildAxes();
+  },
+
+  componentWillReceiveProps: function (nextProps) {
+    // console.log('will receive props!');
+  },
 
   render: function () {
     // draw the rectangles based on the sumType
@@ -685,7 +752,7 @@ var GraphSvg = React.createClass({
 
     return React.createElement(
       'svg',
-      { id: 'graphSvg', width: '800', height: '400', style: { border: '1px solid black' } },
+      { id: 'graphSvg', width: '800', height: '400' },
       rects,
       line,
       points,
@@ -695,11 +762,11 @@ var GraphSvg = React.createClass({
   },
 
   _toSvgX: function (_x) {
-    return _x / 30 * 600 + this.state.ORIGIN_X;
+    return _x * this.state.xToSvgFactor + this.state.ORIGIN_X;
   },
 
   _toSvgY: function (_y) {
-    return -(_y / 10) * 300 + this.state.ORIGIN_Y;
+    return -(_y * this.state.yToSvgFactor) + this.state.ORIGIN_Y;
   },
 
   _buildRects: function (data, heightArray) {
@@ -744,7 +811,8 @@ var GraphSvg = React.createClass({
   },
 
   _buildAxes: function () {
-    // build axes, scales, etc.
+    // Drawing axes is done by D3 after the component is mounted or updated
+    // TODO: Calculate axes based on origin, data
     var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
     var xAxisFn = d3.svg.axis().ticks(12).tickSize(10, 1).scale(xScale).orient('bottom');
     var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
@@ -885,9 +953,18 @@ var _sumType = 'Upper';
 var _rectHeights = [];
 var _totalRiemannSum = 0.0;
 var _lineType = ''; // linear, basis, etc.
-var _inputX = '';
-var _inputY = '';
 recalculateSum(); // TODO: remove after clearing default data
+
+function addDataPoint(x, y) {
+  var i = _dataPoints.length - 1;
+
+  while (_dataPoints[i][0] > x) {
+    _dataPoints[i + 1] = _dataPoints[i];
+    i--;
+  }
+  _dataPoints[i + 1] = [x, y];
+  recalculateSum();
+}
 
 function changeSumType(value) {
   _sumType = value;
@@ -963,10 +1040,10 @@ var RiemannStore = Object.assign({}, EventEmitter.prototype, {
 
 AppDispatcher.register(function (action) {
   switch (action.actionType) {
-    // case Constants.ADD_POINT:
-    //   addToHistory('something');
-    //   RiemannStore.emitChange();
-    //   break;
+    case Constants.ADD_POINT:
+      addDataPoint(action.x, action.y);
+      RiemannStore.emitChange();
+      break;
     case Constants.CHANGE_SUM_TYPE:
       changeSumType(action.value);
       RiemannStore.emitChange();

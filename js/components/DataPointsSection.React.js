@@ -6,19 +6,39 @@ var DataPointsSection = React.createClass({
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired
   },
 
+  componentDidMount: function () {
+    this.refs.addButton.disabled = true;
+  },
+
   render: function () {
     var tbody = this._buildTableBody(this.props.data);
 
     return (
-      <div id="dataPointsSection" className="col-xs-2">
-      <h3>Data</h3>
+      <div id="dataPointsSection" className="col-xs-3">
+        <h3>Data</h3>
+        <form>
         <table className="table table-hover">
           <tbody>
+            <tr>
+              <td>(</td>
+              <td><input name="inputX" ref="inputX" className="form-control" placeholder="X" onChange={this._validateInput} /></td>
+              <td><input name="inputY" ref="inputY" className="form-control" placeholder="Y" onChange={this._validateInput} /></td>
+              <td>)</td>
+              <td><button type="submit" ref="addButton" className="btn btn-default" onClick={this._addDataPoint}> + </button></td>
+            </tr>
             {tbody}
           </tbody>
         </table>
+        </form>
       </div>
     );
+  },
+
+  _addDataPoint: function (event) {
+    RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
+    this.refs.inputX.value = '';
+    this.refs.inputY.value = '';
+    event.preventDefault();
   },
 
   _buildTableRow: function (key, pt) {
@@ -29,7 +49,7 @@ var DataPointsSection = React.createClass({
         <td>, {pt[1]}</td>
         <td>)</td>
         <td>
-          <button type="button" className="close" onClick={this._deleteDataPoint.bind(this, key)}>
+          <button type="button" className="close" onClick={this._deleteDataPoint.bind(this, key)} style={{float: 'left'}}>
             <span>&times;</span>
           </button>
         </td>
@@ -49,6 +69,11 @@ var DataPointsSection = React.createClass({
 
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
+  },
+
+  _validateInput: function () {
+    // TODO: disallow when x value already exists
+    this.refs.addButton.disabled = Number.isNaN(parseFloat(this.refs.inputX.value)) || Number.isNaN(parseFloat(this.refs.inputY.value));
   }
 });
 
