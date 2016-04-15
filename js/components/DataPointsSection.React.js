@@ -73,7 +73,11 @@ var DataPointsSection = React.createClass({
 
   _validateInput: function () {
     // TODO: disallow when x value already exists
-    this.refs.addButton.disabled = Number.isNaN(parseFloat(this.refs.inputX.value)) || Number.isNaN(parseFloat(this.refs.inputY.value));
+    var _x = parseFloat(this.refs.inputX.value), _y = parseFloat(this.refs.inputY.value);
+    this.refs.addButton.disabled =
+        Number.isNaN(_x) ||
+        Number.isNaN(_y) ||
+        this.props.data.some(function (point) { return point[0] == _x; });
   }
 });
 

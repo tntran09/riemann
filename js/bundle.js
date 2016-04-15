@@ -623,7 +623,11 @@ var DataPointsSection = React.createClass({
 
   _validateInput: function () {
     // TODO: disallow when x value already exists
-    this.refs.addButton.disabled = Number.isNaN(parseFloat(this.refs.inputX.value)) || Number.isNaN(parseFloat(this.refs.inputY.value));
+    var _x = parseFloat(this.refs.inputX.value),
+        _y = parseFloat(this.refs.inputY.value);
+    this.refs.addButton.disabled = Number.isNaN(_x) || Number.isNaN(_y) || this.props.data.some(function (point) {
+      return point[0] == _x;
+    });
   }
 });
 
@@ -772,11 +776,12 @@ var GraphSvg = React.createClass({
   _buildRects: function (data, heightArray) {
     var rects = [];
     for (var i = 0; i < heightArray.length; i++) {
+      var neg = heightArray[i] < 0;
       var x = this._toSvgX(data[i][0]);
-      var y = this._toSvgY(heightArray[i]);
-      var width = this._toSvgX(data[i + 1][0]) - this._toSvgX(data[i][0]);
-      var height = this.state.ORIGIN_Y - y;
-      rects.push(React.createElement('rect', { x: x, y: y, width: width, height: height }));
+      var y = neg ? this.state.ORIGIN_Y : this._toSvgY(heightArray[i]);
+      var width = this.state.xToSvgFactor * (data[i + 1][0] - data[i][0]);
+      var height = Math.abs(heightArray[i] * this.state.yToSvgFactor);
+      rects.push(React.createElement('rect', { x: x, y: y, width: width, height: height, className: neg ? 'red' : 'blue' }));
     }
 
     return rects;

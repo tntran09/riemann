@@ -59,12 +59,13 @@ var GraphSvg = React.createClass({
   _buildRects: function (data, heightArray) {
     var rects = [];
     for(var i = 0; i < heightArray.length; i++) {
+      var neg = heightArray[i] < 0;
       var x = this._toSvgX(data[i][0]);
-      var y = this._toSvgY(heightArray[i]);
-      var width = this._toSvgX(data[i + 1][0]) - this._toSvgX(data[i][0]);
-      var height = this.state.ORIGIN_Y - y;
+      var y = neg ? this.state.ORIGIN_Y : this._toSvgY(heightArray[i]);
+      var width = this.state.xToSvgFactor * (data[i + 1][0] - data[i][0]);
+      var height = Math.abs(heightArray[i] * this.state.yToSvgFactor);
       rects.push(
-        <rect x={x} y={y} width={width} height={height} />
+        <rect x={x} y={y} width={width} height={height} className={neg ? 'red' : 'blue'} />
       );
     }
 
