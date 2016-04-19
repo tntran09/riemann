@@ -563,6 +563,7 @@ var DataPointsSection = React.createClass({
     RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
     this.refs.inputX.value = '';
     this.refs.inputY.value = '';
+    this.refs.addButton.disabled = true;
     event.preventDefault();
   },
 
@@ -622,7 +623,6 @@ var DataPointsSection = React.createClass({
   },
 
   _validateInput: function () {
-    // TODO: disallow when x value already exists
     var _x = parseFloat(this.refs.inputX.value),
         _y = parseFloat(this.refs.inputY.value);
     this.refs.addButton.disabled = Number.isNaN(_x) || Number.isNaN(_y) || this.props.data.some(function (point) {
@@ -650,7 +650,7 @@ var GraphSection = React.createClass({
   render: function () {
     return React.createElement(
       'div',
-      { id: 'graphSection', className: 'col-xs-9' },
+      { id: 'graphSection', className: 'col-xs-9', hidden: this.props.data.length == 0 },
       React.createElement(
         'div',
         { className: 'row' },
@@ -726,11 +726,14 @@ var GraphSvg = React.createClass({
   },
 
   getInitialState: function () {
+    console.log(this.props.data.length);
     return {
-      ORIGIN_X: 100,
+      ORIGIN_X: 50,
       ORIGIN_Y: 350,
-      xToSvgFactor: 20,
-      yToSvgFactor: 30
+      xToSvgFactor: 25,
+      yToSvgFactor: 30,
+      xScale: d3.scale.linear().domain([0, 24]).range([50, 650]).nice(),
+      yScale: d3.scale.linear().domain([0, 10]).range([350, 50]).nice()
     };
   },
 
@@ -743,7 +746,33 @@ var GraphSvg = React.createClass({
   },
 
   componentWillReceiveProps: function (nextProps) {
-    // console.log('will receive props!');
+    var ar = nextProps.data;
+    var xMin = 0,
+        xMax = 1,
+        yMin = 0,
+        yMax = 1;
+
+    for (var i = 0; i < ar.length; i++) {
+      xMin = Math.min(xMin, ar[i][0]);
+      xMax = Math.max(xMax, ar[i][0]);
+      yMin = Math.min(yMin, ar[i][1]);
+      yMax = Math.max(yMax, ar[i][1]);
+    }
+    xMin = Math.round(xMin);
+    xMax = Math.round(xMax);
+    yMin = Math.round(yMin);
+    yMax = Math.round(yMax);
+
+    var xs = this.state.xScale.domain([xMin, xMax]);
+    var ys = this.state.yScale.domain([yMin, yMax]);
+    this.setState({
+      xToSvgFactor: 600 / (xMax - xMin),
+      yToSvgFactor: 300 / (yMax - yMin),
+      ORIGIN_X: xs(0),
+      ORIGIN_Y: ys(0),
+      xScale: xs,
+      yScale: ys
+    });
   },
 
   render: function () {
@@ -794,13 +823,7 @@ var GraphSvg = React.createClass({
       return this._toSvgY(d[1]);
     }).interpolate('linear');
 
-    var style = {
-      fill: 'none',
-      stroke: 'black',
-      strokeWidth: '2px'
-    };
-
-    return React.createElement('path', { d: lineGenFn.call(this, data), style: style });
+    return React.createElement('path', { d: lineGenFn.call(this, data) });
   },
 
   _buildPoints: function (data) {
@@ -809,7 +832,7 @@ var GraphSvg = React.createClass({
     for (var i = 0; i < data.length; i++) {
       var cx = this._toSvgX(data[i][0]);
       var cy = this._toSvgY(data[i][1]);
-      points.push(React.createElement('circle', { key: i, cx: cx, cy: cy, r: '3', style: { fill: 'black' } }));
+      points.push(React.createElement('circle', { key: i, cx: cx, cy: cy, r: '3' }));
     }
 
     return points;
@@ -818,10 +841,10 @@ var GraphSvg = React.createClass({
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
     // TODO: Calculate axes based on origin, data
-    var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
-    var xAxisFn = d3.svg.axis().ticks(12).tickSize(10, 1).scale(xScale).orient('bottom');
-    var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
-    var yAxisFn = d3.svg.axis().ticks(5).tickSize(10, 1).scale(yScale).orient('left');
+    // var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
+    var xAxisFn = d3.svg.axis().ticks(12).tickSize(10, 1).scale(this.state.xScale).orient('bottom');
+    // var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
+    var yAxisFn = d3.svg.axis().ticks(5).tickSize(10, 1).scale(this.state.yScale).orient('left');
 
     d3.select(this.refs.xAxisGroup).call(xAxisFn);
     d3.select(this.refs.yAxisGroup).call(yAxisFn);
@@ -963,7 +986,7 @@ recalculateSum(); // TODO: remove after clearing default data
 function addDataPoint(x, y) {
   var i = _dataPoints.length - 1;
 
-  while (_dataPoints[i][0] > x) {
+  while (i >= 0 && _dataPoints[i][0] > x) {
     _dataPoints[i + 1] = _dataPoints[i];
     i--;
   }
@@ -988,11 +1011,12 @@ function recalculateSum() {
   var fn = chooseHeightFn();
   for (var i = 0; i < numberOfRectangles; i++) {
     var h = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+    h = Math.round(h * 10000) / 10000;
     _rectHeights[i] = h;
     _totalRiemannSum += h * (_dataPoints[i + 1][0] - _dataPoints[i][0]);
   }
 
-  _totalRiemannSum = Math.round(_totalRiemannSum * 1000000) / 1000000;
+  _totalRiemannSum = Math.round(_totalRiemannSum * 10000) / 10000;
 }
 
 function chooseHeightFn() {

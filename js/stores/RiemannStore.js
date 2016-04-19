@@ -17,7 +17,7 @@ recalculateSum(); // TODO: remove after clearing default data
 function addDataPoint(x, y) {
   var i = _dataPoints.length - 1;
 
-  while (_dataPoints[i][0] > x) {
+  while (i >= 0 && _dataPoints[i][0] > x) {
     _dataPoints[i + 1] = _dataPoints[i];
     i--;
   }
@@ -42,11 +42,12 @@ function recalculateSum() {
   var fn = chooseHeightFn();
   for(var i = 0; i < numberOfRectangles; i++) {
     var h = fn(_dataPoints[i][1], _dataPoints[i + 1][1]);
+    h = Math.round(h * 10000) / 10000;
     _rectHeights[i] = h;
     _totalRiemannSum += h * (_dataPoints[i + 1][0] - _dataPoints[i][0]);
   }
 
-  _totalRiemannSum = Math.round(_totalRiemannSum * 1000000) / 1000000;
+  _totalRiemannSum = Math.round(_totalRiemannSum * 10000) / 10000;
 }
 
 function chooseHeightFn() {

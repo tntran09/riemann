@@ -9,11 +9,14 @@ var GraphSvg = React.createClass({
   },
 
   getInitialState: function () {
+    console.log(this.props.data.length);
     return {
-      ORIGIN_X: 100,
+      ORIGIN_X: 50,
       ORIGIN_Y: 350,
-      xToSvgFactor: 20,
-      yToSvgFactor: 30
+      xToSvgFactor: 25,
+      yToSvgFactor: 30,
+      xScale: d3.scale.linear().domain([0, 24]).range([50, 650]).nice(),
+      yScale: d3.scale.linear().domain([0, 10]).range([350, 50]).nice()
     }
   },
 
@@ -26,7 +29,30 @@ var GraphSvg = React.createClass({
   },
 
   componentWillReceiveProps: function (nextProps) {
-    // console.log('will receive props!');
+    var ar = nextProps.data;
+    var xMin = 0, xMax = 1, yMin = 0, yMax = 1;
+
+    for(var i = 0; i < ar.length; i++) {
+      xMin = Math.min(xMin, ar[i][0]);
+      xMax = Math.max(xMax, ar[i][0]);
+      yMin = Math.min(yMin, ar[i][1]);
+      yMax = Math.max(yMax, ar[i][1]);
+    }
+    xMin = Math.round(xMin);
+    xMax = Math.round(xMax);
+    yMin = Math.round(yMin);
+    yMax = Math.round(yMax);
+
+    var xs = this.state.xScale.domain([xMin, xMax]);
+    var ys = this.state.yScale.domain([yMin, yMax]);
+    this.setState({
+      xToSvgFactor: 600 / (xMax - xMin),
+      yToSvgFactor: 300 / (yMax - yMin),
+      ORIGIN_X: xs(0),
+      ORIGIN_Y: ys(0),
+      xScale: xs,
+      yScale: ys
+    });
   },
 
   render: function () {
@@ -78,14 +104,8 @@ var GraphSvg = React.createClass({
       .y(function (d) { return this._toSvgY(d[1]); })
       .interpolate('linear');
 
-    var style = {
-      fill: 'none',
-      stroke: 'black',
-      strokeWidth: '2px'
-    };
-
     return (
-      <path d={lineGenFn.call(this, data)} style={style}></path>
+      <path d={lineGenFn.call(this, data)}></path>
     );
   },
 
@@ -96,7 +116,7 @@ var GraphSvg = React.createClass({
       var cx = this._toSvgX(data[i][0]);
       var cy = this._toSvgY(data[i][1]);
       points.push(
-        <circle key={i} cx={cx} cy={cy} r="3" style={{fill: 'black'}} />
+        <circle key={i} cx={cx} cy={cy} r="3" />
       );
     }
 
@@ -106,17 +126,17 @@ var GraphSvg = React.createClass({
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
     // TODO: Calculate axes based on origin, data
-    var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
+    // var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
     var xAxisFn = d3.svg.axis()
       .ticks(12)
       .tickSize(10, 1)
-      .scale(xScale)
+      .scale(this.state.xScale)
       .orient('bottom');
-    var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
+    // var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
     var yAxisFn = d3.svg.axis()
       .ticks(5)
       .tickSize(10, 1)
-      .scale(yScale)
+      .scale(this.state.yScale)
       .orient('left');
 
     d3.select(this.refs.xAxisGroup).call(xAxisFn);

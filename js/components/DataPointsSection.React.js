@@ -38,6 +38,7 @@ var DataPointsSection = React.createClass({
     RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
     this.refs.inputX.value = '';
     this.refs.inputY.value = '';
+    this.refs.addButton.disabled = true;
     event.preventDefault();
   },
 
@@ -72,7 +73,6 @@ var DataPointsSection = React.createClass({
   },
 
   _validateInput: function () {
-    // TODO: disallow when x value already exists
     var _x = parseFloat(this.refs.inputX.value), _y = parseFloat(this.refs.inputY.value);
     this.refs.addButton.disabled =
         Number.isNaN(_x) ||
