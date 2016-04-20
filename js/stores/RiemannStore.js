@@ -8,10 +8,10 @@ var CHANGE_EVENT = 'change';
 var _dataPoints = [
   [0, 7.5], [4, 9], [8, 9.3], [12, 9.5], [16, 8.8], [20, 8], [24, 7.2]
 ]; // clear default data after building input
+var _lineType = 'Linear';
 var _sumType = 'Upper';
 var _rectHeights = [];
 var _totalRiemannSum = 0.0;
-var _lineType = ''; // linear, basis, etc.
 recalculateSum(); // TODO: remove after clearing default data
 
 function addDataPoint(x, y) {
@@ -23,6 +23,10 @@ function addDataPoint(x, y) {
   }
   _dataPoints[i + 1] = [x, y];
   recalculateSum();
+}
+
+function changeLineType(value) {
+  _lineType = value;
 }
 
 function changeSumType(value) {
@@ -69,6 +73,7 @@ var RiemannStore = Object.assign({}, EventEmitter.prototype, {
   getAppState: function () {
     return {
       dataPoints: _dataPoints,
+      lineType: _lineType,
       rectHeights: _rectHeights,
       sumType: _sumType,
       totalRiemannSum: _totalRiemannSum
@@ -92,6 +97,10 @@ AppDispatcher.register(function (action) {
   switch(action.actionType) {
     case Constants.ADD_POINT:
       addDataPoint(action.x, action.y);
+      RiemannStore.emitChange();
+      break;
+    case Constants.CHANGE_LINE_TYPE:
+      changeLineType(action.value);
       RiemannStore.emitChange();
       break;
     case Constants.CHANGE_SUM_TYPE:

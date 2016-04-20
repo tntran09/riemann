@@ -404,6 +404,13 @@ var MolarMassActions = {
     });
   },
 
+  changeLineType: function (value) {
+    AppDispatcher.dispatch({
+      actionType: Constants.CHANGE_LINE_TYPE,
+      value: value
+    });
+  },
+
   changeSumType: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,
@@ -643,6 +650,7 @@ var GraphSection = React.createClass({
 
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
+    lineType: React.PropTypes.string,
     rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
     sumType: React.PropTypes.string.isRequired
   },
@@ -656,7 +664,7 @@ var GraphSection = React.createClass({
         { className: 'row' },
         React.createElement(
           'div',
-          { className: 'col-xs-offset-5 col-xs-3' },
+          { className: 'col-xs-offset-3 col-xs-3' },
           React.createElement(
             'label',
             { htmlFor: 'sumType' },
@@ -691,6 +699,34 @@ var GraphSection = React.createClass({
               'Midpoint'
             )
           )
+        ),
+        React.createElement(
+          'div',
+          { className: 'col-xs-3' },
+          React.createElement(
+            'label',
+            { htmlFor: 'lineType' },
+            'Interpolate'
+          ),
+          React.createElement(
+            'select',
+            { name: 'lineType', className: 'form-control', ref: 'lineType', onChange: this._updateLineType, value: this.props.lineType },
+            React.createElement(
+              'option',
+              null,
+              'Linear'
+            ),
+            React.createElement(
+              'option',
+              null,
+              'Basis'
+            ),
+            React.createElement(
+              'option',
+              null,
+              'None'
+            )
+          )
         )
       ),
       React.createElement(
@@ -699,10 +735,14 @@ var GraphSection = React.createClass({
         React.createElement(
           'div',
           { className: 'col-xs-12' },
-          React.createElement(GraphSvg, { data: this.props.data, sumType: this.props.sumType, rectHeights: this.props.rectHeights })
+          React.createElement(GraphSvg, { data: this.props.data, lineType: this.props.lineType, sumType: this.props.sumType, rectHeights: this.props.rectHeights })
         )
       )
     );
+  },
+
+  _updateLineType: function () {
+    RiemannActions.changeLineType(this.refs.lineType.value);
   },
 
   _updateSumType: function () {
@@ -779,7 +819,7 @@ var GraphSvg = React.createClass({
     // draw the rectangles based on the sumType
     var rects = this._buildRects(this.props.data, this.props.rectHeights);
     // draw the interpolated line
-    var line = this._buildLine(this.props.data);
+    var line = this._buildLine(this.props.data, this.props.lineType);
     // draw the points
     var points = this._buildPoints(this.props.data);
 
@@ -816,12 +856,17 @@ var GraphSvg = React.createClass({
     return rects;
   },
 
-  _buildLine: function (data) {
+  _buildLine: function (data, lineType) {
+    console.log(lineType);
+    if (lineType === 'None') {
+      return '';
+    }
+
     var lineGenFn = d3.svg.line().x(function (d) {
       return this._toSvgX(d[0]);
     }).y(function (d) {
       return this._toSvgY(d[1]);
-    }).interpolate('linear');
+    }).interpolate(lineType.toLowerCase());
 
     return React.createElement('path', { d: lineGenFn.call(this, data) });
   },
@@ -840,10 +885,8 @@ var GraphSvg = React.createClass({
 
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
-    // TODO: Calculate axes based on origin, data
-    // var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
     var xAxisFn = d3.svg.axis().ticks(12).tickSize(10, 1).scale(this.state.xScale).orient('bottom');
-    // var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
+
     var yAxisFn = d3.svg.axis().ticks(5).tickSize(10, 1).scale(this.state.yScale).orient('left');
 
     d3.select(this.refs.xAxisGroup).call(xAxisFn);
@@ -915,7 +958,7 @@ var RiemannApp = React.createClass({
         'div',
         { className: 'row' },
         React.createElement(DataPointsSection, { data: this.state.dataPoints }),
-        React.createElement(GraphSection, { data: this.state.dataPoints, sumType: this.state.sumType, rectHeights: this.state.rectHeights })
+        React.createElement(GraphSection, { data: this.state.dataPoints, lineType: this.state.lineType, sumType: this.state.sumType, rectHeights: this.state.rectHeights })
       ),
       React.createElement(CalcSection, { data: this.state.dataPoints, sumType: this.state.sumType, rectHeights: this.state.rectHeights, totalRiemannSum: this.state.totalRiemannSum })
     );
@@ -931,6 +974,7 @@ module.exports = RiemannApp;
 },{"../stores/RiemannStore":14,"./CalcSection.React":5,"./DataPointsSection.React":6,"./GraphSection.React":7,"./HeaderSection.React":9,"react/dist/react.min":19}],11:[function(require,module,exports){
 module.exports = {
   ADD_POINT: 'ADD_POINT',
+  CHANGE_LINE_TYPE: 'CHANGE_LINE_TYPE',
   CHANGE_SUM_TYPE: 'CHANGE_SUM_TYPE',
   DELETE_DATA_POINT: 'DELETE_DATA_POINT'
 };
@@ -977,10 +1021,10 @@ var Constants = require('../constants/Constants');
 var CHANGE_EVENT = 'change';
 
 var _dataPoints = [[0, 7.5], [4, 9], [8, 9.3], [12, 9.5], [16, 8.8], [20, 8], [24, 7.2]]; // clear default data after building input
+var _lineType = 'Linear';
 var _sumType = 'Upper';
 var _rectHeights = [];
 var _totalRiemannSum = 0.0;
-var _lineType = ''; // linear, basis, etc.
 recalculateSum(); // TODO: remove after clearing default data
 
 function addDataPoint(x, y) {
@@ -992,6 +1036,10 @@ function addDataPoint(x, y) {
   }
   _dataPoints[i + 1] = [x, y];
   recalculateSum();
+}
+
+function changeLineType(value) {
+  _lineType = value;
 }
 
 function changeSumType(value) {
@@ -1048,6 +1096,7 @@ var RiemannStore = Object.assign({}, EventEmitter.prototype, {
   getAppState: function () {
     return {
       dataPoints: _dataPoints,
+      lineType: _lineType,
       rectHeights: _rectHeights,
       sumType: _sumType,
       totalRiemannSum: _totalRiemannSum
@@ -1071,6 +1120,10 @@ AppDispatcher.register(function (action) {
   switch (action.actionType) {
     case Constants.ADD_POINT:
       addDataPoint(action.x, action.y);
+      RiemannStore.emitChange();
+      break;
+    case Constants.CHANGE_LINE_TYPE:
+      changeLineType(action.value);
       RiemannStore.emitChange();
       break;
     case Constants.CHANGE_SUM_TYPE:

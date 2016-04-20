@@ -59,7 +59,7 @@ var GraphSvg = React.createClass({
     // draw the rectangles based on the sumType
     var rects = this._buildRects(this.props.data, this.props.rectHeights);
     // draw the interpolated line
-    var line = this._buildLine(this.props.data);
+    var line = this._buildLine(this.props.data, this.props.lineType);
     // draw the points
     var points = this._buildPoints(this.props.data);
 
@@ -98,11 +98,16 @@ var GraphSvg = React.createClass({
     return rects;
   },
 
-  _buildLine: function (data) {
+  _buildLine: function (data, lineType) {
+    console.log(lineType);
+    if (lineType === 'None') {
+      return '';
+    }
+
     var lineGenFn = d3.svg.line()
       .x(function (d) { return this._toSvgX(d[0]); })
       .y(function (d) { return this._toSvgY(d[1]); })
-      .interpolate('linear');
+      .interpolate(lineType.toLowerCase());
 
     return (
       <path d={lineGenFn.call(this, data)}></path>
@@ -125,14 +130,12 @@ var GraphSvg = React.createClass({
 
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
-    // TODO: Calculate axes based on origin, data
-    // var xScale = d3.scale.linear().domain([0, 24]).range([100, 580]).nice();
     var xAxisFn = d3.svg.axis()
       .ticks(12)
       .tickSize(10, 1)
       .scale(this.state.xScale)
       .orient('bottom');
-    // var yScale = d3.scale.linear().domain([0, 10]).range([350, 50]).nice();
+
     var yAxisFn = d3.svg.axis()
       .ticks(5)
       .tickSize(10, 1)

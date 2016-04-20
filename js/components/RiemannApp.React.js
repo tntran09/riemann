@@ -24,7 +24,7 @@ var RiemannApp = React.createClass({
         <HeaderSection />
         <div className="row">
           <DataPointsSection data={this.state.dataPoints} />
-          <GraphSection data={this.state.dataPoints} sumType={this.state.sumType} rectHeights={this.state.rectHeights} />
+          <GraphSection data={this.state.dataPoints} lineType={this.state.lineType} sumType={this.state.sumType} rectHeights={this.state.rectHeights} />
         </div>
         <CalcSection data={this.state.dataPoints} sumType={this.state.sumType} rectHeights={this.state.rectHeights} totalRiemannSum={this.state.totalRiemannSum} />
       </div>

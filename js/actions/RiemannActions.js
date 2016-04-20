@@ -10,6 +10,13 @@ var MolarMassActions = {
     });
   },
 
+  changeLineType: function (value) {
+    AppDispatcher.dispatch({
+      actionType: Constants.CHANGE_LINE_TYPE,
+      value: value
+    });
+  },
+
   changeSumType: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,
