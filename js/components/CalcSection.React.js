@@ -18,7 +18,7 @@ var CalcSection = React.createClass({
     }, this);
 
     return (
-      <div id="calcSection" style={{fontSize: '2.5em'}} hidden={this.props.rectHeights.length == 0}>
+      <div id="calcSection" className="container" hidden={this.props.rectHeights.length == 0}>
         <p>{this.props.sumType} Sum</p>
         <p>= {eqnParts1.join(' + ')}</p>
         <p>= {eqnParts2.join(' + ')}</p>

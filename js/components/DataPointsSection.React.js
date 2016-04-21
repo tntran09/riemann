@@ -14,7 +14,7 @@ var DataPointsSection = React.createClass({
     var tbody = this._buildTableBody(this.props.data);
 
     return (
-      <div id="dataPointsSection" className="col-xs-3">
+      <div id="dataPointsSection" className="container">
         <h3>Data</h3>
         <form>
         <table className="table table-hover">

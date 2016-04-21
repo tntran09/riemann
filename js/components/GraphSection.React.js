@@ -12,7 +12,7 @@ var GraphSection = React.createClass({
 
   render: function () {
     return (
-      <div id="graphSection" className="col-xs-9" hidden={this.props.data.length == 0}>
+      <div id="graphSection" className="container" hidden={this.props.data.length == 0}>
         <div className="row">
           <div className="col-xs-offset-3 col-xs-3">
             <label htmlFor="sumType">Sum Method</label>
@@ -33,6 +33,7 @@ var GraphSection = React.createClass({
             </select>
           </div>
         </div>
+
         <div className="row">
           <div className="col-xs-12">
             <GraphSvg data={this.props.data} lineType={this.props.lineType} sumType={this.props.sumType} rectHeights={this.props.rectHeights} />

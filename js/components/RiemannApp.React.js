@@ -20,12 +20,10 @@ var RiemannApp = React.createClass({
 
   render: function () {
     return (
-      <div id="riemannApp" className="container">
+      <div id="riemannApp">
         <HeaderSection />
-        <div className="row">
-          <DataPointsSection data={this.state.dataPoints} />
-          <GraphSection data={this.state.dataPoints} lineType={this.state.lineType} sumType={this.state.sumType} rectHeights={this.state.rectHeights} />
-        </div>
+        <DataPointsSection data={this.state.dataPoints} />
+        <GraphSection data={this.state.dataPoints} lineType={this.state.lineType} sumType={this.state.sumType} rectHeights={this.state.rectHeights} />
         <CalcSection data={this.state.dataPoints} sumType={this.state.sumType} rectHeights={this.state.rectHeights} totalRiemannSum={this.state.totalRiemannSum} />
       </div>
     );

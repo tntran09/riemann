@@ -99,7 +99,6 @@ var GraphSvg = React.createClass({
   },
 
   _buildLine: function (data, lineType) {
-    console.log(lineType);
     if (lineType === 'None') {
       return '';
     }

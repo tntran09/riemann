@@ -26,6 +26,34 @@
       circle {
         fill: black;
       }
+
+      #dataPointsSection {
+        left: 0;
+        margin-left: -260px;
+        overflow-y: auto;
+        position: fixed;
+        transition: .2s 0s all ease-out;
+        width: 260px;
+      }
+
+      #graphSection {
+        border-left: 1px solid #ddd;
+      }
+
+      #calcSection {
+        border-left: 1px solid #ddd;
+        font-size: 2.5em;
+      }
+
+      @media (min-width: 768px) {
+        #riemannApp {
+          padding-left: 260px;
+        }
+
+        #dataPointsSection {
+          left: 260px;
+        }
+      }
     </style>
   </head>
   <body>

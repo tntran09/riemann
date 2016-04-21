@@ -460,7 +460,7 @@ var CalcSection = React.createClass({
 
     return React.createElement(
       'div',
-      { id: 'calcSection', style: { fontSize: '2.5em' }, hidden: this.props.rectHeights.length == 0 },
+      { id: 'calcSection', className: 'container', hidden: this.props.rectHeights.length == 0 },
       React.createElement(
         'p',
         null,
@@ -511,7 +511,7 @@ var DataPointsSection = React.createClass({
 
     return React.createElement(
       'div',
-      { id: 'dataPointsSection', className: 'col-xs-3' },
+      { id: 'dataPointsSection', className: 'container' },
       React.createElement(
         'h3',
         null,
@@ -658,7 +658,7 @@ var GraphSection = React.createClass({
   render: function () {
     return React.createElement(
       'div',
-      { id: 'graphSection', className: 'col-xs-9', hidden: this.props.data.length == 0 },
+      { id: 'graphSection', className: 'container', hidden: this.props.data.length == 0 },
       React.createElement(
         'div',
         { className: 'row' },
@@ -857,7 +857,6 @@ var GraphSvg = React.createClass({
   },
 
   _buildLine: function (data, lineType) {
-    console.log(lineType);
     if (lineType === 'None') {
       return '';
     }
@@ -905,19 +904,23 @@ var HeaderSection = React.createClass({
   render: function () {
     return React.createElement(
       "div",
-      { id: "headerSection", className: "row" },
+      { id: "headerSection", className: "container" },
       React.createElement(
         "div",
-        { className: "col-xs-12" },
+        { className: "row" },
         React.createElement(
-          "h2",
-          null,
-          "Riemann"
-        ),
-        React.createElement(
-          "h5",
-          null,
-          "Calculate and visualize Riemann Sums"
+          "div",
+          { className: "col-xs-12" },
+          React.createElement(
+            "h2",
+            null,
+            "Riemann"
+          ),
+          React.createElement(
+            "h5",
+            null,
+            "Calculate and visualize Riemann Sums"
+          )
         )
       )
     );
@@ -952,14 +955,10 @@ var RiemannApp = React.createClass({
   render: function () {
     return React.createElement(
       'div',
-      { id: 'riemannApp', className: 'container' },
+      { id: 'riemannApp' },
       React.createElement(HeaderSection, null),
-      React.createElement(
-        'div',
-        { className: 'row' },
-        React.createElement(DataPointsSection, { data: this.state.dataPoints }),
-        React.createElement(GraphSection, { data: this.state.dataPoints, lineType: this.state.lineType, sumType: this.state.sumType, rectHeights: this.state.rectHeights })
-      ),
+      React.createElement(DataPointsSection, { data: this.state.dataPoints }),
+      React.createElement(GraphSection, { data: this.state.dataPoints, lineType: this.state.lineType, sumType: this.state.sumType, rectHeights: this.state.rectHeights }),
       React.createElement(CalcSection, { data: this.state.dataPoints, sumType: this.state.sumType, rectHeights: this.state.rectHeights, totalRiemannSum: this.state.totalRiemannSum })
     );
   },
