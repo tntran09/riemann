@@ -404,13 +404,6 @@ var MolarMassActions = {
     });
   },
 
-  changeLineType: function (value) {
-    AppDispatcher.dispatch({
-      actionType: Constants.CHANGE_LINE_TYPE,
-      value: value
-    });
-  },
-
   changeSumType: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,
@@ -422,6 +415,12 @@ var MolarMassActions = {
     AppDispatcher.dispatch({
       actionType: Constants.DELETE_DATA_POINT,
       index: index
+    });
+  },
+
+  toggleShowLine: function (value) {
+    AppDispatcher.dispatch({
+      actionType: Constants.TOGGLE_SHOW_LINE
     });
   }
 };
@@ -499,7 +498,9 @@ var DataPointsSection = React.createClass({
   displayName: 'DataPointsSection',
 
   propTypes: {
-    data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired
+    data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
+    sumType: React.PropTypes.string.isRequired,
+    showLine: React.PropTypes.bool.isRequired
   },
 
   componentDidMount: function () {
@@ -512,6 +513,63 @@ var DataPointsSection = React.createClass({
     return React.createElement(
       'div',
       { id: 'dataPointsSection', className: 'container' },
+      React.createElement(
+        'button',
+        { type: 'button', ref: 'hamburgerButton', className: 'hamburger hamburger--arrow', onClick: this._toggleHamburger },
+        React.createElement(
+          'span',
+          { className: 'hamburger-box' },
+          React.createElement('span', { className: 'hamburger-inner' })
+        )
+      ),
+      React.createElement(
+        'div',
+        { className: 'form-group' },
+        React.createElement(
+          'label',
+          { htmlFor: 'showLine' },
+          React.createElement('input', { type: 'checkbox', name: 'showLine', id: 'showLine', onChange: this._toggleShowLine, checked: this.props.showLine }),
+          'Show line'
+        )
+      ),
+      React.createElement(
+        'div',
+        { className: 'form-group' },
+        React.createElement(
+          'label',
+          { htmlFor: 'sumType' },
+          'Sum Method'
+        ),
+        React.createElement(
+          'select',
+          { name: 'sumType', className: 'form-control', id: 'sumType', ref: 'sumType', onChange: this._updateSumType, value: this.props.sumType },
+          React.createElement(
+            'option',
+            null,
+            'Upper'
+          ),
+          React.createElement(
+            'option',
+            null,
+            'Lower'
+          ),
+          React.createElement(
+            'option',
+            null,
+            'Left'
+          ),
+          React.createElement(
+            'option',
+            null,
+            'Right'
+          ),
+          React.createElement(
+            'option',
+            null,
+            'Midpoint'
+          )
+        )
+      ),
       React.createElement(
         'h3',
         null,
@@ -571,6 +629,7 @@ var DataPointsSection = React.createClass({
     this.refs.inputX.value = '';
     this.refs.inputY.value = '';
     this.refs.addButton.disabled = true;
+    this.refs.inputX.focus();
     event.preventDefault();
   },
 
@@ -629,6 +688,22 @@ var DataPointsSection = React.createClass({
     RiemannActions.delete(index);
   },
 
+  _toggleHamburger: function () {
+    if (this.refs.hamburgerButton.classList.length > 2) {
+      this.refs.hamburgerButton.className = 'hamburger hamburger--arrow';
+    } else {
+      this.refs.hamburgerButton.className += ' is-active';
+    }
+  },
+
+  _toggleShowLine: function () {
+    RiemannActions.toggleShowLine();
+  },
+
+  _updateSumType: function () {
+    RiemannActions.changeSumType(this.refs.sumType.value);
+  },
+
   _validateInput: function () {
     var _x = parseFloat(this.refs.inputX.value),
         _y = parseFloat(this.refs.inputY.value);
@@ -650,9 +725,8 @@ var GraphSection = React.createClass({
 
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
-    lineType: React.PropTypes.string,
     rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
-    sumType: React.PropTypes.string.isRequired
+    showLine: React.PropTypes.bool.isRequired
   },
 
   render: function () {
@@ -664,89 +738,11 @@ var GraphSection = React.createClass({
         { className: 'row' },
         React.createElement(
           'div',
-          { className: 'col-xs-offset-3 col-xs-3' },
-          React.createElement(
-            'label',
-            { htmlFor: 'sumType' },
-            'Sum Method'
-          ),
-          React.createElement(
-            'select',
-            { name: 'sumType', className: 'form-control', ref: 'sumType', onChange: this._updateSumType, value: this.props.sumType },
-            React.createElement(
-              'option',
-              null,
-              'Upper'
-            ),
-            React.createElement(
-              'option',
-              null,
-              'Lower'
-            ),
-            React.createElement(
-              'option',
-              null,
-              'Left'
-            ),
-            React.createElement(
-              'option',
-              null,
-              'Right'
-            ),
-            React.createElement(
-              'option',
-              null,
-              'Midpoint'
-            )
-          )
-        ),
-        React.createElement(
-          'div',
-          { className: 'col-xs-3' },
-          React.createElement(
-            'label',
-            { htmlFor: 'lineType' },
-            'Interpolate'
-          ),
-          React.createElement(
-            'select',
-            { name: 'lineType', className: 'form-control', ref: 'lineType', onChange: this._updateLineType, value: this.props.lineType },
-            React.createElement(
-              'option',
-              null,
-              'Linear'
-            ),
-            React.createElement(
-              'option',
-              null,
-              'Basis'
-            ),
-            React.createElement(
-              'option',
-              null,
-              'None'
-            )
-          )
-        )
-      ),
-      React.createElement(
-        'div',
-        { className: 'row' },
-        React.createElement(
-          'div',
           { className: 'col-xs-12' },
-          React.createElement(GraphSvg, { data: this.props.data, lineType: this.props.lineType, sumType: this.props.sumType, rectHeights: this.props.rectHeights })
+          React.createElement(GraphSvg, { data: this.props.data, rectHeights: this.props.rectHeights, showLine: this.props.showLine })
         )
       )
     );
-  },
-
-  _updateLineType: function () {
-    RiemannActions.changeLineType(this.refs.lineType.value);
-  },
-
-  _updateSumType: function () {
-    RiemannActions.changeSumType(this.refs.sumType.value);
   }
 });
 
@@ -762,11 +758,10 @@ var GraphSvg = React.createClass({
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
     rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
-    sumType: React.PropTypes.string.isRequired
+    showLine: React.PropTypes.bool.isRequired
   },
 
   getInitialState: function () {
-    console.log(this.props.data.length);
     return {
       ORIGIN_X: 50,
       ORIGIN_Y: 350,
@@ -819,7 +814,7 @@ var GraphSvg = React.createClass({
     // draw the rectangles based on the sumType
     var rects = this._buildRects(this.props.data, this.props.rectHeights);
     // draw the interpolated line
-    var line = this._buildLine(this.props.data, this.props.lineType);
+    var line = this._buildLine(this.props.data, this.props.showLine);
     // draw the points
     var points = this._buildPoints(this.props.data);
 
@@ -856,8 +851,8 @@ var GraphSvg = React.createClass({
     return rects;
   },
 
-  _buildLine: function (data, lineType) {
-    if (lineType === 'None') {
+  _buildLine: function (data, showLine) {
+    if (!showLine) {
       return '';
     }
 
@@ -865,7 +860,7 @@ var GraphSvg = React.createClass({
       return this._toSvgX(d[0]);
     }).y(function (d) {
       return this._toSvgY(d[1]);
-    }).interpolate(lineType.toLowerCase());
+    }).interpolate('linear');
 
     return React.createElement('path', { d: lineGenFn.call(this, data) });
   },
@@ -957,8 +952,8 @@ var RiemannApp = React.createClass({
       'div',
       { id: 'riemannApp' },
       React.createElement(HeaderSection, null),
-      React.createElement(DataPointsSection, { data: this.state.dataPoints }),
-      React.createElement(GraphSection, { data: this.state.dataPoints, lineType: this.state.lineType, sumType: this.state.sumType, rectHeights: this.state.rectHeights }),
+      React.createElement(DataPointsSection, { data: this.state.dataPoints, showLine: this.state.showLine, sumType: this.state.sumType }),
+      React.createElement(GraphSection, { data: this.state.dataPoints, showLine: this.state.showLine, rectHeights: this.state.rectHeights }),
       React.createElement(CalcSection, { data: this.state.dataPoints, sumType: this.state.sumType, rectHeights: this.state.rectHeights, totalRiemannSum: this.state.totalRiemannSum })
     );
   },
@@ -973,9 +968,9 @@ module.exports = RiemannApp;
 },{"../stores/RiemannStore":14,"./CalcSection.React":5,"./DataPointsSection.React":6,"./GraphSection.React":7,"./HeaderSection.React":9,"react/dist/react.min":19}],11:[function(require,module,exports){
 module.exports = {
   ADD_POINT: 'ADD_POINT',
-  CHANGE_LINE_TYPE: 'CHANGE_LINE_TYPE',
   CHANGE_SUM_TYPE: 'CHANGE_SUM_TYPE',
-  DELETE_DATA_POINT: 'DELETE_DATA_POINT'
+  DELETE_DATA_POINT: 'DELETE_DATA_POINT',
+  TOGGLE_SHOW_LINE: 'TOGGLE_SHOW_LINE'
 };
 
 },{}],12:[function(require,module,exports){
@@ -1021,6 +1016,7 @@ var CHANGE_EVENT = 'change';
 
 var _dataPoints = [[0, 7.5], [4, 9], [8, 9.3], [12, 9.5], [16, 8.8], [20, 8], [24, 7.2]]; // clear default data after building input
 var _lineType = 'Linear';
+var _showLine = true;
 var _sumType = 'Upper';
 var _rectHeights = [];
 var _totalRiemannSum = 0.0;
@@ -1037,10 +1033,6 @@ function addDataPoint(x, y) {
   recalculateSum();
 }
 
-function changeLineType(value) {
-  _lineType = value;
-}
-
 function changeSumType(value) {
   _sumType = value;
   recalculateSum();
@@ -1049,6 +1041,10 @@ function changeSumType(value) {
 function deleteDataPoint(index) {
   _dataPoints.splice(index, 1);
   recalculateSum();
+}
+
+function toggleShowLine(value) {
+  _showLine = !_showLine;
 }
 
 function recalculateSum() {
@@ -1096,6 +1092,7 @@ var RiemannStore = Object.assign({}, EventEmitter.prototype, {
     return {
       dataPoints: _dataPoints,
       lineType: _lineType,
+      showLine: _showLine,
       rectHeights: _rectHeights,
       sumType: _sumType,
       totalRiemannSum: _totalRiemannSum
@@ -1121,16 +1118,16 @@ AppDispatcher.register(function (action) {
       addDataPoint(action.x, action.y);
       RiemannStore.emitChange();
       break;
-    case Constants.CHANGE_LINE_TYPE:
-      changeLineType(action.value);
-      RiemannStore.emitChange();
-      break;
     case Constants.CHANGE_SUM_TYPE:
       changeSumType(action.value);
       RiemannStore.emitChange();
       break;
     case Constants.DELETE_DATA_POINT:
       deleteDataPoint(action.index);
+      RiemannStore.emitChange();
+      break;
+    case Constants.TOGGLE_SHOW_LINE:
+      toggleShowLine();
       RiemannStore.emitChange();
       break;
     default: // noop

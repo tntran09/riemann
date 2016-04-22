@@ -5,6 +5,7 @@
     <title>Calculate Riemann sums</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/hamburgers.min.css">
     <style>
       .axis line, rect, path {
         stroke: black;
@@ -28,20 +29,28 @@
       }
 
       #dataPointsSection {
+        background-color: white;
+        border: 1px solid #ddd;
         left: 0;
         margin-left: -260px;
         overflow-y: auto;
         position: fixed;
+        top: 0;
         transition: .2s 0s all ease-out;
         width: 260px;
+        z-index: 1;
+      }
+
+      .hamburger:focus {
+        outline: none;
       }
 
       #graphSection {
-        border-left: 1px solid #ddd;
+        /*border-left: 1px solid #ddd;*/
       }
 
       #calcSection {
-        border-left: 1px solid #ddd;
+        /*border-left: 1px solid #ddd;*/
         font-size: 2.5em;
       }
 

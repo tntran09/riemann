@@ -3,7 +3,9 @@ var RiemannActions = require('../actions/RiemannActions');
 
 var DataPointsSection = React.createClass({
   propTypes: {
-    data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired
+    data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
+    sumType: React.PropTypes.string.isRequired,
+    showLine: React.PropTypes.bool.isRequired
   },
 
   componentDidMount: function () {
@@ -15,6 +17,28 @@ var DataPointsSection = React.createClass({
 
     return (
       <div id="dataPointsSection" className="container">
+        <button type="button" ref="hamburgerButton" className="hamburger hamburger--arrow" onClick={this._toggleHamburger}>
+          <span className="hamburger-box">
+            <span className="hamburger-inner"></span>
+          </span>
+        </button>
+
+        <div className="form-group">
+          <label htmlFor="showLine">
+            <input type="checkbox" name="showLine" id="showLine" onChange={this._toggleShowLine} checked={this.props.showLine}/>
+            Show line
+          </label>
+        </div>
+        <div className="form-group">
+          <label htmlFor="sumType">Sum Method</label>
+          <select name="sumType" className="form-control" id="sumType" ref="sumType" onChange={this._updateSumType} value={this.props.sumType}>
+            <option>Upper</option>
+            <option>Lower</option>
+            <option>Left</option>
+            <option>Right</option>
+            <option>Midpoint</option>
+          </select>
+        </div>
         <h3>Data</h3>
         <form>
         <table className="table table-hover">
@@ -39,6 +63,7 @@ var DataPointsSection = React.createClass({
     this.refs.inputX.value = '';
     this.refs.inputY.value = '';
     this.refs.addButton.disabled = true;
+    this.refs.inputX.focus();
     event.preventDefault();
   },
 
@@ -70,6 +95,23 @@ var DataPointsSection = React.createClass({
 
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
+  },
+
+  _toggleHamburger: function () {
+    if (this.refs.hamburgerButton.classList.length > 2) {
+      this.refs.hamburgerButton.className = 'hamburger hamburger--arrow';
+    }
+    else {
+      this.refs.hamburgerButton.className += ' is-active';
+    }
+  },
+
+  _toggleShowLine: function () {
+    RiemannActions.toggleShowLine();
+  },
+
+  _updateSumType: function () {
+    RiemannActions.changeSumType(this.refs.sumType.value);
   },
 
   _validateInput: function () {

@@ -10,13 +10,6 @@ var MolarMassActions = {
     });
   },
 
-  changeLineType: function (value) {
-    AppDispatcher.dispatch({
-      actionType: Constants.CHANGE_LINE_TYPE,
-      value: value
-    });
-  },
-
   changeSumType: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,
@@ -29,7 +22,13 @@ var MolarMassActions = {
       actionType: Constants.DELETE_DATA_POINT,
       index: index
     });
-  }
+  },
+
+  toggleShowLine: function (value) {
+    AppDispatcher.dispatch({
+      actionType: Constants.TOGGLE_SHOW_LINE
+    });
+  },
 };
 
 module.exports = MolarMassActions;

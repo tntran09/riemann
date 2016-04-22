@@ -5,11 +5,10 @@ var GraphSvg = React.createClass({
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
     rectHeights: React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
-    sumType: React.PropTypes.string.isRequired
+    showLine: React.PropTypes.bool.isRequired
   },
 
   getInitialState: function () {
-    console.log(this.props.data.length);
     return {
       ORIGIN_X: 50,
       ORIGIN_Y: 350,
@@ -59,7 +58,7 @@ var GraphSvg = React.createClass({
     // draw the rectangles based on the sumType
     var rects = this._buildRects(this.props.data, this.props.rectHeights);
     // draw the interpolated line
-    var line = this._buildLine(this.props.data, this.props.lineType);
+    var line = this._buildLine(this.props.data, this.props.showLine);
     // draw the points
     var points = this._buildPoints(this.props.data);
 
@@ -98,15 +97,15 @@ var GraphSvg = React.createClass({
     return rects;
   },
 
-  _buildLine: function (data, lineType) {
-    if (lineType === 'None') {
+  _buildLine: function (data, showLine) {
+    if (!showLine) {
       return '';
     }
 
     var lineGenFn = d3.svg.line()
       .x(function (d) { return this._toSvgX(d[0]); })
       .y(function (d) { return this._toSvgY(d[1]); })
-      .interpolate(lineType.toLowerCase());
+      .interpolate('linear');
 
     return (
       <path d={lineGenFn.call(this, data)}></path>
