@@ -9,12 +9,22 @@ var GraphSvg = React.createClass({
   },
 
   getInitialState: function () {
+    var width = document.body.clientWidth;
+    if (width > 768) {
+      width -= 300;
+    }
+    else {
+      width -= 40;
+    }
+    var whiteSpace = width / 16;
     return {
-      ORIGIN_X: 50,
+      ORIGIN_X: whiteSpace,
       ORIGIN_Y: 350,
-      xToSvgFactor: 25,
+      svgWidth: width,
+      svgHeight: 400,
+      xToSvgFactor: (width - (2*whiteSpace)) / 24,
       yToSvgFactor: 30,
-      xScale: d3.scale.linear().domain([0, 24]).range([50, 650]).nice(),
+      xScale: d3.scale.linear().domain([0, 24]).range([whiteSpace, width - whiteSpace]).nice(),
       yScale: d3.scale.linear().domain([0, 10]).range([350, 50]).nice()
     }
   },
@@ -45,7 +55,7 @@ var GraphSvg = React.createClass({
     var xs = this.state.xScale.domain([xMin, xMax]);
     var ys = this.state.yScale.domain([yMin, yMax]);
     this.setState({
-      xToSvgFactor: 600 / (xMax - xMin),
+      xToSvgFactor: (this.state.svgWidth * 7 / 8) / (xMax - xMin),
       yToSvgFactor: 300 / (yMax - yMin),
       ORIGIN_X: xs(0),
       ORIGIN_Y: ys(0),
@@ -63,7 +73,7 @@ var GraphSvg = React.createClass({
     var points = this._buildPoints(this.props.data);
 
     return (
-      <svg id="graphSvg" width="800" height="400">
+      <svg id="graphSvg" width={this.state.svgWidth} height={this.state.svgHeight}>
         {rects}
         {line}
         {points}
@@ -129,7 +139,7 @@ var GraphSvg = React.createClass({
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
     var xAxisFn = d3.svg.axis()
-      .ticks(12)
+      .ticks(8)
       .tickSize(10, 1)
       .scale(this.state.xScale)
       .orient('bottom');

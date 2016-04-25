@@ -28,6 +28,10 @@
         fill: black;
       }
 
+      #riemannApp {
+        padding-top: 50px;
+      }
+
       #dataPointsSection {
         background-color: white;
         border: 1px solid #ddd;
@@ -36,13 +40,32 @@
         overflow-y: auto;
         position: fixed;
         top: 0;
-        transition: .2s 0s all ease-out;
+        transition: .2s 0s left ease-out;
         width: 260px;
+        z-index: 1;
+      }
+
+      #hamburgerButton {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-left: none;
+        left: 0;
+        position: fixed;
+        top: 0;
+        transition: .2s 0s all ease-out;
         z-index: 1;
       }
 
       .hamburger:focus {
         outline: none;
+      }
+
+      .hamburger:hover {
+        opacity: 1;
+      }
+
+      .pull-out {
+        left: 260 !important;
       }
 
       #graphSection {
@@ -51,7 +74,7 @@
 
       #calcSection {
         /*border-left: 1px solid #ddd;*/
-        font-size: 2.5em;
+        font-size: 2em;
       }
 
       @media (min-width: 768px) {
@@ -60,7 +83,11 @@
         }
 
         #dataPointsSection {
-          left: 260px;
+          left: 260;
+        }
+
+        #hamburgerButton {
+          display: none;
         }
       }
     </style>

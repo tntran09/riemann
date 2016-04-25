@@ -17,12 +17,6 @@ var DataPointsSection = React.createClass({
 
     return (
       <div id="dataPointsSection" className="container">
-        <button type="button" ref="hamburgerButton" className="hamburger hamburger--arrow" onClick={this._toggleHamburger}>
-          <span className="hamburger-box">
-            <span className="hamburger-inner"></span>
-          </span>
-        </button>
-
         <div className="form-group">
           <label htmlFor="showLine">
             <input type="checkbox" name="showLine" id="showLine" onChange={this._toggleShowLine} checked={this.props.showLine}/>
@@ -95,15 +89,6 @@ var DataPointsSection = React.createClass({
 
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
-  },
-
-  _toggleHamburger: function () {
-    if (this.refs.hamburgerButton.classList.length > 2) {
-      this.refs.hamburgerButton.className = 'hamburger hamburger--arrow';
-    }
-    else {
-      this.refs.hamburgerButton.className += ' is-active';
-    }
   },
 
   _toggleShowLine: function () {

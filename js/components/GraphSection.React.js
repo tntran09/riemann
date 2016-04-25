@@ -11,7 +11,7 @@ var GraphSection = React.createClass({
 
   render: function () {
     return (
-      <div id="graphSection" className="container" hidden={this.props.data.length == 0}>
+      <div id="graphSection" className="container-fluid" hidden={this.props.data.length == 0}>
         <div className="row">
           <div className="col-xs-12">
             <GraphSvg data={this.props.data} rectHeights={this.props.rectHeights} showLine={this.props.showLine} />
