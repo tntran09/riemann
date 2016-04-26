@@ -1,6 +1,9 @@
 var React = require('react/dist/react.min');
 var RiemannActions = require('../actions/RiemannActions');
 
+var ENTER_CHAR_CODE = 13;
+var COMMA_CHAR_CODE = 188;
+
 var DataPointsSection = React.createClass({
   propTypes: {
     data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
@@ -39,7 +42,7 @@ var DataPointsSection = React.createClass({
           <tbody>
             <tr>
               <td>(</td>
-              <td><input name="inputX" ref="inputX" className="form-control" placeholder="X" onChange={this._validateInput} /></td>
+              <td><input name="inputX" ref="inputX" className="form-control" placeholder="X" onChange={this._validateInput} onKeyDown={this._goNext} /></td>
               <td><input name="inputY" ref="inputY" className="form-control" placeholder="Y" onChange={this._validateInput} /></td>
               <td>)</td>
               <td><button type="submit" ref="addButton" className="btn btn-default" onClick={this._addDataPoint}> + </button></td>
@@ -89,6 +92,14 @@ var DataPointsSection = React.createClass({
 
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
+  },
+
+  _goNext: function (event) {
+    console.log(event.keyCode);
+    if (event.keyCode === COMMA_CHAR_CODE || event.keyCode === ENTER_CHAR_CODE) {
+      this.refs.inputY.focus();
+      event.preventDefault();
+    }
   },
 
   _toggleShowLine: function () {

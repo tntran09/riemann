@@ -14,9 +14,9 @@ var GraphSvg = React.createClass({
       width -= 300;
     }
     else {
-      width -= 40;
+      width -= 30;
     }
-    var whiteSpace = width / 16;
+    var whiteSpace = width / 10;
     return {
       ORIGIN_X: whiteSpace,
       ORIGIN_Y: 350,
@@ -55,7 +55,7 @@ var GraphSvg = React.createClass({
     var xs = this.state.xScale.domain([xMin, xMax]);
     var ys = this.state.yScale.domain([yMin, yMax]);
     this.setState({
-      xToSvgFactor: (this.state.svgWidth * 7 / 8) / (xMax - xMin),
+      xToSvgFactor: (this.state.svgWidth * 4 / 5) / (xMax - xMin),
       yToSvgFactor: 300 / (yMax - yMin),
       ORIGIN_X: xs(0),
       ORIGIN_Y: ys(0),
@@ -139,7 +139,7 @@ var GraphSvg = React.createClass({
   _buildAxes: function () {
     // Drawing axes is done by D3 after the component is mounted or updated
     var xAxisFn = d3.svg.axis()
-      .ticks(8)
+      .ticks(10)
       .tickSize(10, 1)
       .scale(this.state.xScale)
       .orient('bottom');
