@@ -843,8 +843,8 @@ var GraphSvg = React.createClass({
     yMin = Math.round(yMin);
     yMax = Math.round(yMax);
 
-    var xs = d3.scale.linear().domain([xMin, xMax]).range([whiteSpace, width - whiteSpace]).nice();
-    var ys = d3.scale.linear().domain([yMin, yMax]).range([350, 50]).nice();
+    var xs = d3.scale.linear().domain([xMin, xMax]).range([whiteSpace, width - whiteSpace]);
+    var ys = d3.scale.linear().domain([yMin, yMax]).range([350, 50]);
 
     return {
       ORIGIN_X: xs(0),
