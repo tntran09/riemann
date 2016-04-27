@@ -9,28 +9,26 @@ var GraphSvg = React.createClass({
   },
 
   getInitialState: function () {
-    var width = document.body.clientWidth;
-    if (width > 768) {
-      width -= 300;
-    }
-    else {
-      width -= 32;
-    }
-    var whiteSpace = width / 10;
-    return {
-      ORIGIN_X: whiteSpace,
-      ORIGIN_Y: 350,
-      svgWidth: width,
-      svgHeight: 400,
-      xToSvgFactor: (width - (2*whiteSpace)) / 24,
-      yToSvgFactor: 30,
-      xScale: d3.scale.linear().domain([0, 24]).range([whiteSpace, width - whiteSpace]).nice(),
-      yScale: d3.scale.linear().domain([0, 10]).range([350, 50]).nice()
-    }
+    return this._getState(this.props.data);
   },
 
   componentDidMount: function () {
     this._buildAxes();
+
+    var resizing = false;
+    window.addEventListener('resize', function () {
+      if (!resizing) {
+        resizing = true;
+        setTimeout(function () {
+          this.setState(this._getState(this.props.data));
+          this._buildAxes();
+          resizing = false;
+        }.bind(this), 50); // 20fps
+      }
+      else {
+        console.log('did not resize');
+      }
+    }.bind(this));
   },
 
   componentDidUpdate: function () {
@@ -38,30 +36,39 @@ var GraphSvg = React.createClass({
   },
 
   componentWillReceiveProps: function (nextProps) {
-    var ar = nextProps.data;
-    var xMin = 0, xMax = 1, yMin = 0, yMax = 1;
+    this.setState(this._getState(nextProps.data));
+  },
 
-    for(var i = 0; i < ar.length; i++) {
-      xMin = Math.min(xMin, ar[i][0]);
-      xMax = Math.max(xMax, ar[i][0]);
-      yMin = Math.min(yMin, ar[i][1]);
-      yMax = Math.max(yMax, ar[i][1]);
+  _getState: function (data) {
+    var width = document.body.clientWidth;
+    width -= width > 768 ? 300 : 32;
+    var whiteSpace = width / 10;
+
+    var xMin = 0, xMax = 1, yMin = 0, yMax = 1;
+    for(var i = 0; i < data.length; i++) {
+      xMin = Math.min(xMin, data[i][0]);
+      xMax = Math.max(xMax, data[i][0]);
+      yMin = Math.min(yMin, data[i][1]);
+      yMax = Math.max(yMax, data[i][1]);
     }
     xMin = Math.round(xMin);
     xMax = Math.round(xMax);
     yMin = Math.round(yMin);
     yMax = Math.round(yMax);
 
-    var xs = this.state.xScale.domain([xMin, xMax]);
-    var ys = this.state.yScale.domain([yMin, yMax]);
-    this.setState({
-      xToSvgFactor: (this.state.svgWidth * 4 / 5) / (xMax - xMin),
-      yToSvgFactor: 300 / (yMax - yMin),
+    var xs = d3.scale.linear().domain([xMin, xMax]).range([whiteSpace, width - whiteSpace]).nice();
+    var ys = d3.scale.linear().domain([yMin, yMax]).range([350, 50]).nice();
+
+    return {
       ORIGIN_X: xs(0),
       ORIGIN_Y: ys(0),
+      svgWidth: width,
+      svgHeight: 400,
+      xToSvgFactor: (width * 4 / 5) / (xMax - xMin),
+      yToSvgFactor: 300 / (yMax - yMin),
       xScale: xs,
       yScale: ys
-    });
+    };
   },
 
   render: function () {
@@ -83,20 +90,12 @@ var GraphSvg = React.createClass({
     );
   },
 
-  _toSvgX: function (_x) {
-    return (_x * this.state.xToSvgFactor) + this.state.ORIGIN_X;
-  },
-
-  _toSvgY: function (_y) {
-    return -(_y * this.state.yToSvgFactor) + this.state.ORIGIN_Y;
-  },
-
   _buildRects: function (data, heightArray) {
     var rects = [];
     for(var i = 0; i < heightArray.length; i++) {
       var neg = heightArray[i] < 0;
-      var x = this._toSvgX(data[i][0]);
-      var y = neg ? this.state.ORIGIN_Y : this._toSvgY(heightArray[i]);
+      var x = this.state.xScale(data[i][0]);
+      var y = neg ? this.state.ORIGIN_Y : this.state.yScale(heightArray[i]);
       var width = this.state.xToSvgFactor * (data[i + 1][0] - data[i][0]);
       var height = Math.abs(heightArray[i] * this.state.yToSvgFactor);
       rects.push(
@@ -108,26 +107,24 @@ var GraphSvg = React.createClass({
   },
 
   _buildLine: function (data, showLine) {
-    if (!showLine) {
-      return '';
+    if (showLine) {
+      var lineGenFn = d3.svg.line()
+        .x(function (d) { return this.state.xScale(d[0]); })
+        .y(function (d) { return this.state.yScale(d[1]); })
+        .interpolate('linear');
+
+      return (
+        <path d={lineGenFn.call(this, data)}></path>
+      );
     }
-
-    var lineGenFn = d3.svg.line()
-      .x(function (d) { return this._toSvgX(d[0]); })
-      .y(function (d) { return this._toSvgY(d[1]); })
-      .interpolate('linear');
-
-    return (
-      <path d={lineGenFn.call(this, data)}></path>
-    );
   },
 
   _buildPoints: function (data) {
     var points = [];
 
     for(var i = 0; i < data.length; i++) {
-      var cx = this._toSvgX(data[i][0]);
-      var cy = this._toSvgY(data[i][1]);
+      var cx = this.state.xScale(data[i][0]);
+      var cy = this.state.yScale(data[i][1]);
       points.push(
         <circle key={i} cx={cx} cy={cy} r="3" />
       );
