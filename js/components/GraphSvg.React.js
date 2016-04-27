@@ -14,7 +14,7 @@ var GraphSvg = React.createClass({
       width -= 300;
     }
     else {
-      width -= 30;
+      width -= 32;
     }
     var whiteSpace = width / 10;
     return {

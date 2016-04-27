@@ -31,6 +31,12 @@ function changeSumType(value) {
   recalculateSum();
 }
 
+function clearData() {
+  _dataPoints = [];
+  _rectHeights = [];
+  _totalRiemannSum = 0.0;
+}
+
 function deleteDataPoint(index) {
   _dataPoints.splice(index, 1);
   recalculateSum();
@@ -103,6 +109,10 @@ AppDispatcher.register(function (action) {
       break;
     case Constants.CHANGE_SUM_TYPE:
       changeSumType(action.value);
+      RiemannStore.emitChange();
+      break;
+    case Constants.CLEAR_DATA:
+      clearData();
       RiemannStore.emitChange();
       break;
     case Constants.DELETE_DATA_POINT:

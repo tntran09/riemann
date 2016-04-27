@@ -14,7 +14,13 @@ var MolarMassActions = {
     AppDispatcher.dispatch({
       actionType: Constants.CHANGE_SUM_TYPE,
       value: value
-    })
+    });
+  },
+
+  clear: function () {
+    AppDispatcher.dispatch({
+      actionType: Constants.CLEAR_DATA
+    });
   },
 
   delete: function (index) {

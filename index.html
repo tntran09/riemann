@@ -28,6 +28,10 @@
         fill: black;
       }
 
+      h3 a {
+        font-size: 16px;
+      }
+
       #riemannApp {
         padding-top: 50px;
       }
@@ -35,6 +39,7 @@
       #dataPointsSection {
         background-color: white;
         border: 1px solid #ddd;
+        bottom: 0;
         left: 0;
         margin-left: -260px;
         overflow-y: auto;
@@ -68,18 +73,14 @@
         left: 260 !important;
       }
 
-      #graphSection {
-        /*border-left: 1px solid #ddd;*/
-      }
-
       #calcSection {
-        /*border-left: 1px solid #ddd;*/
         font-size: 2em;
       }
 
       @media (min-width: 768px) {
         #riemannApp {
           padding-left: 260px;
+          padding-top: 0;
         }
 
         #dataPointsSection {

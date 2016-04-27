@@ -24,7 +24,7 @@ var RiemannApp = React.createClass({
         <HeaderSection />
         <DataPointsSection data={this.state.dataPoints} showLine={this.state.showLine} sumType={this.state.sumType} />
 
-        <button type="button" ref="hamburgerButton" id="hamburgerButton" className="hamburger is-active hamburger--arrow-r" onClick={this._toggleHamburger}>
+        <button type="button" ref="hamburgerButton" id="hamburgerButton" className="hamburger hamburger--arrow" onClick={this._toggleHamburger}>
           <span className="hamburger-box">
             <span className="hamburger-inner"></span>
           </span>
@@ -41,15 +41,14 @@ var RiemannApp = React.createClass({
   },
 
   _toggleHamburger: function () {
-    var arrowClass = this.refs.hamburgerButton.classList[2];
-
-    if (arrowClass.length == 16) {
-      this.refs.hamburgerButton.className = 'hamburger is-active hamburger--arrow-r';
+    // pull in
+    if (this.refs.hamburgerButton.classList.length > 2) {
+      this.refs.hamburgerButton.className = 'hamburger hamburger--arrow';
       document.getElementById('dataPointsSection').className = 'container';
     }
     else {
-      this.refs.hamburgerButton.className = 'hamburger is-active hamburger--arrow pull-out';
-      document.getElementById('dataPointsSection').className = 'container pull-out';
+      this.refs.hamburgerButton.className += ' is-active pull-out';
+      document.getElementById('dataPointsSection').className += ' pull-out';
     }
   }
 });

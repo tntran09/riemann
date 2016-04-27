@@ -411,6 +411,12 @@ var MolarMassActions = {
     });
   },
 
+  clear: function () {
+    AppDispatcher.dispatch({
+      actionType: Constants.CLEAR_DATA
+    });
+  },
+
   delete: function (index) {
     AppDispatcher.dispatch({
       actionType: Constants.DELETE_DATA_POINT,
@@ -567,7 +573,18 @@ var DataPointsSection = React.createClass({
       React.createElement(
         'h3',
         null,
-        'Data'
+        'Data | ',
+        React.createElement(
+          'a',
+          { href: '#', onClick: this._clearData },
+          'Clear'
+        ),
+        ' | ',
+        React.createElement(
+          'a',
+          { href: '#' },
+          'Random'
+        )
       ),
       React.createElement(
         'form',
@@ -619,11 +636,14 @@ var DataPointsSection = React.createClass({
   },
 
   _addDataPoint: function (event) {
-    RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
-    this.refs.inputX.value = '';
-    this.refs.inputY.value = '';
-    this.refs.addButton.disabled = true;
-    this.refs.inputX.focus();
+    if (this._validateInput) {
+      RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
+      this.refs.inputX.value = '';
+      this.refs.inputY.value = '';
+      this.refs.addButton.disabled = true;
+      this.refs.inputX.focus();
+    }
+
     event.preventDefault();
   },
 
@@ -678,12 +698,16 @@ var DataPointsSection = React.createClass({
     return rows;
   },
 
+  _clearData: function (event) {
+    RiemannActions.clear();
+    event.preventDefault();
+  },
+
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
   },
 
   _goNext: function (event) {
-    console.log(event.keyCode);
     if (event.keyCode === COMMA_CHAR_CODE || event.keyCode === ENTER_CHAR_CODE) {
       this.refs.inputY.focus();
       event.preventDefault();
@@ -701,9 +725,12 @@ var DataPointsSection = React.createClass({
   _validateInput: function () {
     var _x = parseFloat(this.refs.inputX.value),
         _y = parseFloat(this.refs.inputY.value);
-    this.refs.addButton.disabled = Number.isNaN(_x) || Number.isNaN(_y) || this.props.data.some(function (point) {
+    var value = Number.isNaN(_x) || Number.isNaN(_y) || this.props.data.some(function (point) {
       return point[0] == _x;
     });
+
+    this.refs.addButton.disabled = value;
+    return value;
   }
 });
 
@@ -760,7 +787,7 @@ var GraphSvg = React.createClass({
     if (width > 768) {
       width -= 300;
     } else {
-      width -= 30;
+      width -= 32;
     }
     var whiteSpace = width / 10;
     return {
@@ -958,7 +985,7 @@ var RiemannApp = React.createClass({
       React.createElement(DataPointsSection, { data: this.state.dataPoints, showLine: this.state.showLine, sumType: this.state.sumType }),
       React.createElement(
         'button',
-        { type: 'button', ref: 'hamburgerButton', id: 'hamburgerButton', className: 'hamburger is-active hamburger--arrow-r', onClick: this._toggleHamburger },
+        { type: 'button', ref: 'hamburgerButton', id: 'hamburgerButton', className: 'hamburger hamburger--arrow', onClick: this._toggleHamburger },
         React.createElement(
           'span',
           { className: 'hamburger-box' },
@@ -975,14 +1002,13 @@ var RiemannApp = React.createClass({
   },
 
   _toggleHamburger: function () {
-    var arrowClass = this.refs.hamburgerButton.classList[2];
-
-    if (arrowClass.length == 16) {
-      this.refs.hamburgerButton.className = 'hamburger is-active hamburger--arrow-r';
+    // pull in
+    if (this.refs.hamburgerButton.classList.length > 2) {
+      this.refs.hamburgerButton.className = 'hamburger hamburger--arrow';
       document.getElementById('dataPointsSection').className = 'container';
     } else {
-      this.refs.hamburgerButton.className = 'hamburger is-active hamburger--arrow pull-out';
-      document.getElementById('dataPointsSection').className = 'container pull-out';
+      this.refs.hamburgerButton.className += ' is-active pull-out';
+      document.getElementById('dataPointsSection').className += ' pull-out';
     }
   }
 });
@@ -993,6 +1019,7 @@ module.exports = RiemannApp;
 module.exports = {
   ADD_POINT: 'ADD_POINT',
   CHANGE_SUM_TYPE: 'CHANGE_SUM_TYPE',
+  CLEAR_DATA: 'CLEAR_DATA',
   DELETE_DATA_POINT: 'DELETE_DATA_POINT',
   TOGGLE_SHOW_LINE: 'TOGGLE_SHOW_LINE'
 };
@@ -1060,6 +1087,12 @@ function addDataPoint(x, y) {
 function changeSumType(value) {
   _sumType = value;
   recalculateSum();
+}
+
+function clearData() {
+  _dataPoints = [];
+  _rectHeights = [];
+  _totalRiemannSum = 0.0;
 }
 
 function deleteDataPoint(index) {
@@ -1144,6 +1177,10 @@ AppDispatcher.register(function (action) {
       break;
     case Constants.CHANGE_SUM_TYPE:
       changeSumType(action.value);
+      RiemannStore.emitChange();
+      break;
+    case Constants.CLEAR_DATA:
+      clearData();
       RiemannStore.emitChange();
       break;
     case Constants.DELETE_DATA_POINT:

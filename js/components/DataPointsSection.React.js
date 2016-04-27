@@ -36,7 +36,9 @@ var DataPointsSection = React.createClass({
             <option>Midpoint</option>
           </select>
         </div>
-        <h3>Data</h3>
+        <h3>
+          Data | <a href="#" onClick={this._clearData}>Clear</a> | <a href="#">Random</a>
+        </h3>
         <form>
         <table className="table table-hover">
           <tbody>
@@ -56,11 +58,14 @@ var DataPointsSection = React.createClass({
   },
 
   _addDataPoint: function (event) {
-    RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
-    this.refs.inputX.value = '';
-    this.refs.inputY.value = '';
-    this.refs.addButton.disabled = true;
-    this.refs.inputX.focus();
+    if (this._validateInput) {
+      RiemannActions.addPoint(parseFloat(this.refs.inputX.value), parseFloat(this.refs.inputY.value));
+      this.refs.inputX.value = '';
+      this.refs.inputY.value = '';
+      this.refs.addButton.disabled = true;
+      this.refs.inputX.focus();
+    }
+
     event.preventDefault();
   },
 
@@ -90,12 +95,16 @@ var DataPointsSection = React.createClass({
     return rows;
   },
 
+  _clearData: function (event) {
+    RiemannActions.clear();
+    event.preventDefault();
+  },
+
   _deleteDataPoint: function (index) {
     RiemannActions.delete(index);
   },
 
   _goNext: function (event) {
-    console.log(event.keyCode);
     if (event.keyCode === COMMA_CHAR_CODE || event.keyCode === ENTER_CHAR_CODE) {
       this.refs.inputY.focus();
       event.preventDefault();
@@ -112,10 +121,11 @@ var DataPointsSection = React.createClass({
 
   _validateInput: function () {
     var _x = parseFloat(this.refs.inputX.value), _y = parseFloat(this.refs.inputY.value);
-    this.refs.addButton.disabled =
-        Number.isNaN(_x) ||
-        Number.isNaN(_y) ||
-        this.props.data.some(function (point) { return point[0] == _x; });
+    var value = Number.isNaN(_x) || Number.isNaN(_y)
+        || this.props.data.some(function (point) { return point[0] == _x; });
+
+    this.refs.addButton.disabled = value;
+    return value;
   }
 });
 
