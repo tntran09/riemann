@@ -720,8 +720,9 @@ var DataPointsSection = React.createClass({
     }
   },
 
-  _randomizeData: function () {
+  _randomizeData: function (event) {
     RiemannActions.randomize();
+    event.preventDefault();
   },
 
   _toggleShowLine: function () {
