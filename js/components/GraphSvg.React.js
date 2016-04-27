@@ -145,7 +145,7 @@ var GraphSvg = React.createClass({
       .orient('bottom');
 
     var yAxisFn = d3.svg.axis()
-      .ticks(5)
+      .ticks(6)
       .tickSize(10, 1)
       .scale(this.state.yScale)
       .orient('left');

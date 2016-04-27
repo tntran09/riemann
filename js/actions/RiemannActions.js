@@ -30,6 +30,12 @@ var MolarMassActions = {
     });
   },
 
+  randomize: function () {
+    AppDispatcher.dispatch({
+      actionType: Constants.RANDOMIZE_DATA
+    });
+  },
+
   toggleShowLine: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.TOGGLE_SHOW_LINE

@@ -424,6 +424,12 @@ var MolarMassActions = {
     });
   },
 
+  randomize: function () {
+    AppDispatcher.dispatch({
+      actionType: Constants.RANDOMIZE_DATA
+    });
+  },
+
   toggleShowLine: function (value) {
     AppDispatcher.dispatch({
       actionType: Constants.TOGGLE_SHOW_LINE
@@ -582,7 +588,7 @@ var DataPointsSection = React.createClass({
         ' | ',
         React.createElement(
           'a',
-          { href: '#' },
+          { href: '#', onClick: this._randomizeData },
           'Random'
         )
       ),
@@ -712,6 +718,10 @@ var DataPointsSection = React.createClass({
       this.refs.inputY.focus();
       event.preventDefault();
     }
+  },
+
+  _randomizeData: function () {
+    RiemannActions.randomize();
   },
 
   _toggleShowLine: function () {
@@ -911,7 +921,7 @@ var GraphSvg = React.createClass({
     // Drawing axes is done by D3 after the component is mounted or updated
     var xAxisFn = d3.svg.axis().ticks(10).tickSize(10, 1).scale(this.state.xScale).orient('bottom');
 
-    var yAxisFn = d3.svg.axis().ticks(5).tickSize(10, 1).scale(this.state.yScale).orient('left');
+    var yAxisFn = d3.svg.axis().ticks(6).tickSize(10, 1).scale(this.state.yScale).orient('left');
 
     d3.select(this.refs.xAxisGroup).call(xAxisFn);
     d3.select(this.refs.yAxisGroup).call(yAxisFn);
@@ -1021,6 +1031,7 @@ module.exports = {
   CHANGE_SUM_TYPE: 'CHANGE_SUM_TYPE',
   CLEAR_DATA: 'CLEAR_DATA',
   DELETE_DATA_POINT: 'DELETE_DATA_POINT',
+  RANDOMIZE_DATA: 'RANDOMIZE_DATA',
   TOGGLE_SHOW_LINE: 'TOGGLE_SHOW_LINE'
 };
 
@@ -1097,6 +1108,18 @@ function clearData() {
 
 function deleteDataPoint(index) {
   _dataPoints.splice(index, 1);
+  recalculateSum();
+}
+
+function randomizeData() {
+  _dataPoints = [];
+  var xStart = Math.floor(Math.random() * 10) - 5,
+      xEnd = xStart + 10;
+  for (var i = xStart; i < xEnd; i++) {
+    var y = Math.floor(Math.random() * 20) - 10;
+    _dataPoints.push([i, y]);
+  }
+
   recalculateSum();
 }
 
@@ -1185,6 +1208,10 @@ AppDispatcher.register(function (action) {
       break;
     case Constants.DELETE_DATA_POINT:
       deleteDataPoint(action.index);
+      RiemannStore.emitChange();
+      break;
+    case Constants.RANDOMIZE_DATA:
+      randomizeData();
       RiemannStore.emitChange();
       break;
     case Constants.TOGGLE_SHOW_LINE:

@@ -42,6 +42,17 @@ function deleteDataPoint(index) {
   recalculateSum();
 }
 
+function randomizeData() {
+  _dataPoints = [];
+  var xStart = Math.floor(Math.random() * 10) - 5, xEnd = xStart + 10;
+  for(var i = xStart; i < xEnd; i++) {
+    var y = Math.floor(Math.random() * 20) - 10;
+    _dataPoints.push([i, y]);
+  }
+
+  recalculateSum();
+}
+
 function toggleShowLine(value) {
   _showLine = !_showLine;
 }
@@ -117,6 +128,10 @@ AppDispatcher.register(function (action) {
       break;
     case Constants.DELETE_DATA_POINT:
       deleteDataPoint(action.index);
+      RiemannStore.emitChange();
+      break;
+    case Constants.RANDOMIZE_DATA:
+      randomizeData();
       RiemannStore.emitChange();
       break;
     case Constants.TOGGLE_SHOW_LINE:

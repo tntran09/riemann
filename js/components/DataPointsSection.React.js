@@ -37,7 +37,7 @@ var DataPointsSection = React.createClass({
           </select>
         </div>
         <h3>
-          Data | <a href="#" onClick={this._clearData}>Clear</a> | <a href="#">Random</a>
+          Data | <a href="#" onClick={this._clearData}>Clear</a> | <a href="#" onClick={this._randomizeData}>Random</a>
         </h3>
         <form>
         <table className="table table-hover">
@@ -109,6 +109,10 @@ var DataPointsSection = React.createClass({
       this.refs.inputY.focus();
       event.preventDefault();
     }
+  },
+
+  _randomizeData: function () {
+    RiemannActions.randomize();
   },
 
   _toggleShowLine: function () {
