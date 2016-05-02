@@ -25,9 +25,6 @@ var GraphSvg = React.createClass({
           resizing = false;
         }.bind(this), 50); // 20fps
       }
-      else {
-        console.log('did not resize');
-      }
     }.bind(this));
   },
 
